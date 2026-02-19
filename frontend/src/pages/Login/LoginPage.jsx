@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { getDashboardPath } from '../../utils/constants';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
@@ -17,8 +18,10 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
-      navigate('/volunteer-dashboard');
+      const data = await login(email, password);
+      const user = data?.user ?? data;
+      const role = user?.role || 'volunteer';
+      navigate(getDashboardPath(role));
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Login failed');
     } finally {

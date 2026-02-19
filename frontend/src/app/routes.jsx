@@ -1,17 +1,20 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { getDashboardPath } from '../utils/constants';
 import Loader from '../components/ui/Loader';
 import LandingPage from '../pages/Landing/LandingPage';
 import EventListingPage from '../pages/EventListing/EventListingPage';
 import EventDetailsPage from '../pages/EventDetails/EventDetailsPage';
 import CreateEventPage from '../pages/CreateEvent/CreateEventPage';
 import VolunteerDashboard from '../pages/VolunteerDashboard/VolunteerDashboard';
+import CoordinatorDashboard from '../pages/CoordinatorDashboard/CoordinatorDashboard';
 import NGODashboard from '../pages/NGODashboard/NGODashboard';
 import LoginPage from '../pages/Login/LoginPage';
 import RegisterPage from '../pages/Register/RegisterPage';
 
-function ProtectedRoute({ children }) {
-  const { token, loading } = useAuth();
+function RoleProtectedRoute({ children, allowedRole }) {
+  const { user, token, loading } = useAuth();
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -19,7 +22,16 @@ function ProtectedRoute({ children }) {
       </div>
     );
   }
-  if (!token) return <Navigate to="/login" replace />;
+
+  if (!token || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const userRole = user?.role;
+  if (userRole !== allowedRole) {
+    return <Navigate to={getDashboardPath(userRole)} replace />;
+  }
+
   return children;
 }
 
@@ -32,29 +44,39 @@ export default function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route
-        path="/volunteer-dashboard"
+        path="/dashboard/volunteer"
         element={
-          <ProtectedRoute>
+          <RoleProtectedRoute allowedRole="volunteer">
             <VolunteerDashboard />
-          </ProtectedRoute>
+          </RoleProtectedRoute>
         }
       />
       <Route
-        path="/ngo-dashboard"
+        path="/dashboard/coordinator"
         element={
-          <ProtectedRoute>
+          <RoleProtectedRoute allowedRole="coordinator">
+            <CoordinatorDashboard />
+          </RoleProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/ngo"
+        element={
+          <RoleProtectedRoute allowedRole="ngo">
             <NGODashboard />
-          </ProtectedRoute>
+          </RoleProtectedRoute>
         }
       />
       <Route
         path="/create-event"
         element={
-          <ProtectedRoute>
+          <RoleProtectedRoute allowedRole="ngo">
             <CreateEventPage />
-          </ProtectedRoute>
+          </RoleProtectedRoute>
         }
       />
+      <Route path="/volunteer-dashboard" element={<Navigate to="/dashboard/volunteer" replace />} />
+      <Route path="/ngo-dashboard" element={<Navigate to="/dashboard/ngo" replace />} />
     </Routes>
   );
 }
