@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   { timestamps: true }
 );
@@ -39,6 +43,9 @@ const userSchema = new mongoose.Schema(
 userSchema.pre('save', function (next) {
   if (['ngo', 'coordinator'].includes(this.role) && !this.organization?.trim()) {
     return next(new Error('Organization is required for NGO and coordinator roles'));
+  }
+  if (this.role === 'coordinator' && !this.createdBy) {
+    return next(new Error('createdBy is required for coordinator role'));
   }
   next();
 });

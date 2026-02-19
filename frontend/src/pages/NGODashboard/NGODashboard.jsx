@@ -1,26 +1,35 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Calendar, TrendingUp, Clock, Plus, Edit, Trash2, Eye, BarChart3 } from 'lucide-react';
-import { getNGOStats, getNGOEvents, getNGORegistrations } from '../../services/eventService';
+import { Users, Calendar, TrendingUp, Clock, Plus, Edit, Trash2, Eye, BarChart3, UserPlus } from 'lucide-react';
+import { getNGOStats, getNGOEvents, getNGORegistrations, getNGOCoordinators } from '../../services/eventService';
 import Loader from '../../components/ui/Loader';
+import ManageCoordinatorsTab from './ManageCoordinatorsTab';
 
 export default function NGODashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState(null);
   const [events, setEvents] = useState([]);
   const [registrations, setRegistrations] = useState([]);
+  const [coordinators, setCoordinators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const refreshCoordinators = () => {
+    getNGOCoordinators()
+      .then((list) => setCoordinators(Array.isArray(list) ? list : []))
+      .catch(() => setCoordinators([]));
+  };
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([getNGOStats(), getNGOEvents(), getNGORegistrations()])
-      .then(([statsData, eventsData, regsData]) => {
+    Promise.all([getNGOStats(), getNGOEvents(), getNGORegistrations(), getNGOCoordinators()])
+      .then(([statsData, eventsData, regsData, coordsData]) => {
         if (cancelled) return;
         setStats(statsData);
         setEvents(Array.isArray(eventsData) ? eventsData : (eventsData?.events ?? []));
         setRegistrations(Array.isArray(regsData) ? regsData : (regsData?.registrations ?? []));
+        setCoordinators(Array.isArray(coordsData) ? coordsData : []);
         setError(null);
       })
       .catch(() => {
@@ -29,6 +38,7 @@ export default function NGODashboard() {
           setStats(null);
           setEvents([]);
           setRegistrations([]);
+          setCoordinators([]);
         }
       })
       .finally(() => {
@@ -89,7 +99,7 @@ export default function NGODashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-sm mb-8">
           <div className="flex flex-wrap border-b">
-            {['overview', 'events', 'registrations', 'attendance', 'reports'].map((tab) => (
+            {['overview', 'events', 'registrations', 'coordinators', 'attendance', 'reports'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -99,7 +109,7 @@ export default function NGODashboard() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                {tab === 'events' ? 'Manage Events' : tab}
+                {tab === 'events' ? 'Manage Events' : tab === 'coordinators' ? 'Manage Coordinators' : tab}
               </button>
             ))}
           </div>
@@ -108,6 +118,13 @@ export default function NGODashboard() {
         {activeTab === 'overview' && <OverviewTab stats={statValues} events={events} />}
         {activeTab === 'events' && <ManageEventsTab events={events} />}
         {activeTab === 'registrations' && <RegistrationsTab registrations={registrations} />}
+        {activeTab === 'coordinators' && (
+          <ManageCoordinatorsTab
+            coordinators={coordinators}
+            onRefresh={refreshCoordinators}
+            isLoading={loading}
+          />
+        )}
         {activeTab === 'attendance' && <AttendanceTab events={events} />}
         {activeTab === 'reports' && <ReportsTab />}
       </div>

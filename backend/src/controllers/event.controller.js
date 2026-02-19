@@ -208,8 +208,30 @@ export const updateEvent = asyncHandler(async (req, res) => {
   res.json({ success: true, data: formatEvent(updated) });
 });
 
+const VALID_MODES = ['Online', 'Offline', 'Hybrid'];
+
+function buildEventFilters(query) {
+  const filter = {};
+  const mode = query?.mode;
+  if (mode && typeof mode === 'string' && VALID_MODES.includes(mode)) {
+    filter.mode = mode;
+  }
+  const city = query?.city;
+  if (city && typeof city === 'string' && city.trim()) {
+    filter.location = { $regex: city.trim(), $options: 'i' };
+  }
+  const trending = query?.trending;
+  if (trending === 'true' || trending === true) {
+    filter.trending = true;
+  } else if (trending === 'false' || trending === false) {
+    filter.trending = false;
+  }
+  return filter;
+}
+
 export const getEvents = asyncHandler(async (req, res) => {
-  const events = await Event.find()
+  const filter = buildEventFilters(req.query);
+  const events = await Event.find(filter)
     .populate('ngoId', 'name')
     .sort({ date: 1 })
     .lean();

@@ -120,3 +120,22 @@ export const getNGORegistrations = async () => {
     return [];
   }
 };
+
+export const getNGOCoordinators = async () => {
+  try {
+    const { data } = await api.get('/ngo/coordinators');
+    return data?.data ?? (Array.isArray(data) ? data : []);
+  } catch {
+    return [];
+  }
+};
+
+export const createNGOCoordinator = async (payload) => {
+  const { data } = await api.post('/ngo/coordinators', payload);
+  return data;
+};
+
+export const deleteNGOCoordinator = async (id) => {
+  const { data } = await api.delete(`/ngo/coordinators/${id}`);
+  return data;
+};
