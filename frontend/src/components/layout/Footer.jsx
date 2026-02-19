@@ -1,7 +1,11 @@
 import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { getDashboardPath } from '../../utils/constants';
 
 export default function Footer() {
+  const { user } = useAuth();
+  const dashboardPath = user ? getDashboardPath(user.role) : '/dashboard/volunteer';
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -41,7 +45,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/dashboard/volunteer" className="hover:text-blue-400 transition-colors">
+                <Link to={dashboardPath} className="hover:text-blue-400 transition-colors">
                   My Dashboard
                 </Link>
               </li>
@@ -54,6 +58,22 @@ export default function Footer() {
                 <a href="#" className="hover:text-blue-400 transition-colors">
                   Success Stories
                 </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-white font-semibold mb-4">For Coordinators</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/events" className="hover:text-blue-400 transition-colors">
+                  Browse Events
+                </Link>
+              </li>
+              <li>
+                <Link to="/dashboard/coordinator" className="hover:text-blue-400 transition-colors">
+                  Coordinator Dashboard
+                </Link>
               </li>
             </ul>
           </div>

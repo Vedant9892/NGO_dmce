@@ -134,7 +134,11 @@ export const createEvent = asyncHandler(async (req, res) => {
 });
 
 export const updateEvent = asyncHandler(async (req, res) => {
-  const event = await Event.findById(req.params.id);
+  const id = req.params.id;
+  if (!isValidObjectId(id)) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+  const event = await Event.findById(id);
   if (!event) {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }
@@ -197,7 +201,7 @@ export const updateEvent = asyncHandler(async (req, res) => {
     updates.bannerImage = await uploadBannerToSupabase(req.file);
   }
 
-  const updated = await Event.findByIdAndUpdate(req.params.id, updates, {
+  const updated = await Event.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
   })
@@ -293,8 +297,11 @@ export const registerForEvent = asyncHandler(async (req, res) => {
       message: 'Only volunteers can register for events',
     });
   }
-
-  const event = await Event.findById(req.params.id);
+  const id = req.params.id;
+  if (!isValidObjectId(id)) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+  const event = await Event.findById(id);
   if (!event) {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }
@@ -350,8 +357,11 @@ export const markAttendance = asyncHandler(async (req, res) => {
       message: 'Only assigned coordinators can mark attendance',
     });
   }
-
-  const event = await Event.findById(req.params.id);
+  const id = req.params.id;
+  if (!isValidObjectId(id)) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+  const event = await Event.findById(id);
   if (!event) {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }

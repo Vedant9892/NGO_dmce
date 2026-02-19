@@ -153,7 +153,13 @@ export default function CoordinatorDashboard() {
         ) : (
           <div className="text-center py-12 bg-white rounded-xl text-gray-500">
             <p className="text-lg">No events assigned to you yet.</p>
-            <p className="mt-2 text-sm">Events will appear here when an NGO assigns you as coordinator.</p>
+            <p className="mt-2 text-sm mb-4">Events will appear here when an NGO assigns you as coordinator.</p>
+            <Link
+              to="/events"
+              className="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Explore Events
+            </Link>
           </div>
         )}
       </div>

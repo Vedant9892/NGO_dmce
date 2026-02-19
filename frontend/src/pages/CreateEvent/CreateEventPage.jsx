@@ -90,7 +90,7 @@ export default function CreateEventPage() {
     try {
       await createEvent(formData);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
-      navigate('/ngo-dashboard');
+      navigate('/dashboard/ngo');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to create event');
       setSubmitting(false);
@@ -431,7 +431,7 @@ export default function CreateEventPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-end">
                 <button
                   type="button"
-                  onClick={() => navigate('/ngo-dashboard')}
+                  onClick={() => navigate('/dashboard/ngo')}
                   className="px-8 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel

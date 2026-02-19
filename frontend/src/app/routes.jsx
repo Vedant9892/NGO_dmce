@@ -77,6 +77,7 @@ export default function AppRoutes() {
         }
       />
       <Route path="/volunteer-dashboard" element={<Navigate to="/dashboard/volunteer" replace />} />
+      <Route path="/coordinator-dashboard" element={<Navigate to="/dashboard/coordinator" replace />} />
       <Route path="/ngo-dashboard" element={<Navigate to="/dashboard/ngo" replace />} />
     </Routes>
   );
