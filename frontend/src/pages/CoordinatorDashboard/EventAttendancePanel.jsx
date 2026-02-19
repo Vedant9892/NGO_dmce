@@ -55,7 +55,7 @@ function StatusBadge({ status }) {
   );
 }
 
-export default function EventAttendancePanel({ event, onVolunteersChange }) {
+export default function EventAttendancePanel({ event }) {
   const [volunteers, setVolunteers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -65,13 +65,10 @@ export default function EventAttendancePanel({ event, onVolunteersChange }) {
     if (!event?.id) return;
     setLoading(true);
     getCoordinatorEventVolunteers(event.id)
-      .then((data) => {
-        setVolunteers(Array.isArray(data) ? data : []);
-        onVolunteersChange?.(Array.isArray(data) ? data : []);
-      })
+      .then((data) => setVolunteers(Array.isArray(data) ? data : []))
       .catch(() => setVolunteers([]))
       .finally(() => setLoading(false));
-  }, [event?.id, onVolunteersChange]);
+  }, [event?.id]);
 
   const total = volunteers.length;
   const attended = volunteers.filter((v) => v.status === 'attended').length;
@@ -105,7 +102,6 @@ export default function EventAttendancePanel({ event, onVolunteersChange }) {
         )
       );
       setSelectedIds((prev) => prev.filter((id) => !volunteerIds.includes(id)));
-      onVolunteersChange?.();
     } finally {
       setAttendanceLoading(false);
     }
