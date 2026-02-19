@@ -79,6 +79,29 @@ export const getNGOEvents = async () => {
   }
 };
 
+export const getCoordinatorEvents = async () => {
+  try {
+    const { data } = await api.get('/coordinator/events');
+    return data?.data ?? data?.events ?? (Array.isArray(data) ? data : []);
+  } catch {
+    return [];
+  }
+};
+
+export const getCoordinatorEventVolunteers = async (eventId) => {
+  try {
+    const { data } = await api.get(`/coordinator/events/${eventId}/volunteers`);
+    return data?.data ?? [];
+  } catch {
+    return [];
+  }
+};
+
+export const markAttendance = async (eventId, volunteerIds) => {
+  const { data } = await api.put(`/events/${eventId}/attendance`, { volunteerIds });
+  return data;
+};
+
 export const getNGORegistrations = async () => {
   try {
     const { data } = await api.get('/ngo/registrations');
