@@ -325,52 +325,118 @@ export default function EventAttendancePanel({ event }) {
         </div>
 
         {volunteers.length > 0 ? (
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    <span className="sr-only">Select</span>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Name
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Email
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {volunteers.map((v) => {
-                  const isAttended = v.status === 'attended';
-                  const isSelected = selectedIds.includes(v.volunteerId);
-                  return (
-                    <tr key={v.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        {!isAttended && (
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleSelect(v.volunteerId)}
-                            className="rounded border-gray-300"
-                          />
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                        {v.name || 'N/A'}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{v.email || 'N/A'}</td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={v.status} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="space-y-4">
+            <h3 className="font-semibold text-gray-900">Registration Review</h3>
+            <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      <span className="sr-only">Select</span>
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Volunteer Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Skills
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Applied Role
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {volunteers.map((v) => {
+                    const isAttended = v.status === 'attended';
+                    const isApprovedOrConfirmed = ['approved', 'confirmed'].includes(v.status);
+                    const isSelected = selectedIds.includes(v.volunteerId);
+                    const isPending = v.status === 'pending';
+                    const isRoleOffered = v.status === 'role_offered';
+                    const acting = actionLoadingId === v.id;
+                    const skills = Array.isArray(v.skills) ? v.skills : [];
+                    return (
+                      <tr key={v.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          {isApprovedOrConfirmed && !isAttended && (
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelect(v.volunteerId)}
+                              className="rounded border-gray-300"
+                            />
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                          {v.name || 'N/A'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {skills.length > 0 ? skills.join(', ') : '—'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {v.appliedRole || v.offeredRole || '—'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusBadge status={v.status} />
+                        </td>
+                        <td className="px-4 py-3">
+                          {isPending && (
+                            <div className="flex flex-wrap gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleApprove(v.id)}
+                                disabled={acting}
+                                className="px-2 py-1 text-xs font-semibold bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                              >
+                                {acting ? '...' : 'Approve'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleReject(v.id)}
+                                disabled={acting}
+                                className="px-2 py-1 text-xs font-semibold bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                              >
+                                Reject
+                              </button>
+                              {event?.eventRoles?.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setOfferModalFor(v)}
+                                  disabled={acting}
+                                  className="px-2 py-1 text-xs font-semibold bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                                >
+                                  Offer Role
+                                </button>
+                              )}
+                            </div>
+                          )}
+                          {isRoleOffered && (
+                            <span className="px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded">
+                              Waiting for volunteer response
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {offerModalFor && (
+              <OfferRoleModal
+                event={event}
+                registrationId={offerModalFor.id}
+                volunteerName={offerModalFor.name}
+                availableRoles={event?.eventRoles ?? []}
+                onClose={() => setOfferModalFor(null)}
+                onSuccess={refreshVolunteers}
+              />
+            )}
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center text-gray-500">
