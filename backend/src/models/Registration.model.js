@@ -14,8 +14,8 @@ const registrationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['confirmed', 'pending', 'attended', 'cancelled'],
-      default: 'confirmed',
+      enum: ['pending', 'confirmed', 'attended', 'cancelled'],
+      default: 'pending',
     },
     attendedAt: {
       type: Date,

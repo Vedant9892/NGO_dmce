@@ -16,6 +16,12 @@ const eventSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    registeredVolunteers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
     description: {
       type: String,
       trim: true,
@@ -71,5 +77,14 @@ const eventSchema = new mongoose.Schema(
 eventSchema.index({ ngoId: 1 });
 eventSchema.index({ coordinatorId: 1 });
 eventSchema.index({ date: 1 });
+
+eventSchema.pre('save', function (next) {
+  const capacity = this.volunteersRequired || 0;
+  const registered = this.registeredVolunteers?.length || 0;
+  if (capacity > 0 && registered > capacity) {
+    return next(new Error('Registered volunteers cannot exceed capacity'));
+  }
+  next();
+});
 
 export const Event = mongoose.model('Event', eventSchema);
