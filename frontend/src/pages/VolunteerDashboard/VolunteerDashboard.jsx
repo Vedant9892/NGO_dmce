@@ -5,6 +5,8 @@ import {
   getVolunteerStats,
   getVolunteerEvents,
   getVolunteerCertificates,
+  acceptOffer,
+  declineOffer,
 } from '../../services/eventService';
 import Loader from '../../components/ui/Loader';
 
@@ -119,6 +121,14 @@ export default function VolunteerDashboard() {
           <EventsTab
             registeredEvents={registeredEvents}
             completedEvents={completedEvents}
+            onRefresh={() => {
+              getVolunteerEvents().then((data) => {
+                const reg = data?.registered ?? [];
+                const comp = data?.completed ?? [];
+                setRegisteredEvents(Array.isArray(reg) ? reg : []);
+                setCompletedEvents(Array.isArray(comp) ? comp : []);
+              });
+            }}
           />
         )}
         {activeTab === 'certificates' && <CertificatesTab certificates={certificates} />}
