@@ -1,0 +1,282 @@
+import multer from 'multer';
+import { Event } from '../models/Event.model.js';
+import { Registration } from '../models/Registration.model.js';
+import { User } from '../models/User.model.js';
+import { supabase } from '../config/supabase.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+
+const storage = multer.memoryStorage();
+export const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only images allowed (jpeg, png, webp)'), false);
+    }
+  },
+}).single('bannerImage');
+
+export const uploadBannerToSupabase = async (file) => {
+  if (!file || !file.buffer) return null;
+  const ext = file.originalname.split('.').pop();
+  const name = `events/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+  const { data, error } = await supabase.storage
+    .from('events')
+    .upload(name, file.buffer, {
+      contentType: file.mimetype,
+      upsert: false,
+    });
+
+  if (error) {
+    throw new Error('Image upload failed');
+  }
+
+  const { data: urlData } = supabase.storage.from('events').getPublicUrl(data.path);
+  return urlData?.publicUrl || null;
+};
+
+export const createEvent = asyncHandler(async (req, res) => {
+  const {
+    title,
+    description,
+    detailedDescription,
+    location,
+    mode,
+    date,
+    registrationDeadline,
+    skills,
+    volunteersRequired,
+    roles,
+    eligibility,
+    timeline,
+    perks,
+    contactEmail,
+  } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ success: false, message: 'Title is required' });
+  }
+
+  let bannerImage = null;
+  if (req.file) {
+    bannerImage = await uploadBannerToSupabase(req.file);
+  }
+
+  const event = await Event.create({
+    title,
+    ngoId: req.user._id,
+    description,
+    detailedDescription,
+    location,
+    mode: mode || 'Offline',
+    date: date ? new Date(date) : undefined,
+    registrationDeadline: registrationDeadline ? new Date(registrationDeadline) : undefined,
+    bannerImage,
+    skills: Array.isArray(skills) ? skills : skills ? [skills] : [],
+    volunteersRequired: parseInt(volunteersRequired, 10) || 0,
+    roles: Array.isArray(roles) ? roles : roles ? [roles] : [],
+    eligibility: Array.isArray(eligibility) ? eligibility : eligibility ? [eligibility] : [],
+    timeline: Array.isArray(timeline) ? timeline : [],
+    perks: Array.isArray(perks) ? perks : perks ? [perks] : [],
+    contactEmail,
+  });
+
+  const populated = await Event.findById(event._id)
+    .populate('ngoId', 'name email')
+    .lean();
+
+  res.status(201).json({
+    success: true,
+    data: formatEvent(populated),
+  });
+});
+
+export const updateEvent = asyncHandler(async (req, res) => {
+  const event = await Event.findById(req.params.id);
+  if (!event) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+
+  const isNGO = req.user.role === 'ngo' && event.ngoId.toString() === req.user._id.toString();
+  const isCoordinator =
+    req.user.role === 'coordinator' &&
+    event.coordinatorId?.toString() === req.user._id.toString();
+
+  if (!isNGO && !isCoordinator) {
+    return res.status(403).json({
+      success: false,
+      message: 'Not authorized to edit this event',
+    });
+  }
+
+  const allowed = [
+    'title',
+    'description',
+    'detailedDescription',
+    'location',
+    'mode',
+    'date',
+    'registrationDeadline',
+    'skills',
+    'volunteersRequired',
+    'roles',
+    'eligibility',
+    'timeline',
+    'perks',
+    'contactEmail',
+    'trending',
+  ];
+
+  if (isNGO) {
+    allowed.push('coordinatorId');
+  }
+
+  const updates = {};
+  allowed.forEach((key) => {
+    if (req.body[key] !== undefined) {
+      if (key === 'date' || key === 'registrationDeadline') {
+        updates[key] = new Date(req.body[key]);
+      } else {
+        updates[key] = req.body[key];
+      }
+    }
+  });
+
+  if (req.file) {
+    updates.bannerImage = await uploadBannerToSupabase(req.file);
+  }
+
+  const updated = await Event.findByIdAndUpdate(req.params.id, updates, {
+    new: true,
+    runValidators: true,
+  })
+    .populate('ngoId', 'name email')
+    .populate('coordinatorId', 'name email')
+    .lean();
+
+  res.json({ success: true, data: formatEvent(updated) });
+});
+
+export const getEvents = asyncHandler(async (req, res) => {
+  const events = await Event.find()
+    .populate('ngoId', 'name')
+    .sort({ date: 1 })
+    .lean();
+
+  const result = [];
+  for (const ev of events) {
+    const count = await Registration.countDocuments({
+      eventId: ev._id,
+      status: { $in: ['confirmed', 'attended'] },
+    });
+    result.push(formatEvent({ ...ev, volunteersRegistered: count }));
+  }
+
+  res.json({
+    success: true,
+    data: result,
+    events: result,
+  });
+});
+
+export const getEventById = asyncHandler(async (req, res) => {
+  const event = await Event.findById(req.params.id)
+    .populate('ngoId', 'name email')
+    .populate('coordinatorId', 'name email')
+    .lean();
+
+  if (!event) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+
+  const registrations = await Registration.countDocuments({
+    eventId: event._id,
+    status: { $in: ['confirmed', 'attended'] },
+  });
+
+  res.json({
+    success: true,
+    data: {
+      ...formatEvent(event),
+      volunteersRegistered: registrations,
+    },
+  });
+});
+
+export const registerForEvent = asyncHandler(async (req, res) => {
+  const event = await Event.findById(req.params.id);
+  if (!event) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+
+  const count = await Registration.countDocuments({
+    eventId: event._id,
+    status: { $in: ['confirmed', 'attended'] },
+  });
+  if (count >= (event.volunteersRequired || 0)) {
+    return res.status(400).json({ success: false, message: 'Event is full' });
+  }
+
+  const exists = await Registration.findOne({
+    eventId: event._id,
+    volunteerId: req.user._id,
+  });
+  if (exists) {
+    return res.status(400).json({ success: false, message: 'Already registered' });
+  }
+
+  await Registration.create({
+    eventId: event._id,
+    volunteerId: req.user._id,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: 'Registered successfully',
+  });
+});
+
+export const markAttendance = asyncHandler(async (req, res) => {
+  const event = await Event.findById(req.params.id);
+  if (!event) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+
+  if (event.coordinatorId?.toString() !== req.user._id.toString()) {
+    return res.status(403).json({
+      success: false,
+      message: 'Only assigned coordinator can mark attendance',
+    });
+  }
+
+  const { volunteerIds } = req.body;
+  if (!Array.isArray(volunteerIds) || volunteerIds.length === 0) {
+    return res.status(400).json({ success: false, message: 'volunteerIds array required' });
+  }
+
+  await Registration.updateMany(
+    {
+      eventId: event._id,
+      volunteerId: { $in: volunteerIds },
+    },
+    { status: 'attended', attendedAt: new Date() }
+  );
+
+  res.json({
+    success: true,
+    message: 'Attendance marked',
+  });
+});
+
+function formatEvent(event) {
+  const ngoName = event.ngoId?.name || (event.ngoId && typeof event.ngoId === 'object' ? event.ngoId.name : null);
+  return {
+    ...event,
+    id: event._id,
+    ngoName: ngoName || 'NGO',
+  };
+}
