@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Calendar, TrendingUp, Clock, Plus, Edit, Trash2, Eye, BarChart3, UserPlus } from 'lucide-react';
-import { getNGOStats, getNGOEvents, getNGORegistrations, getNGOCoordinators } from '../../services/eventService';
+import { Users, Calendar, TrendingUp, Clock, Plus, Edit, Trash2, Eye, BarChart3, UserCheck } from 'lucide-react';
+import {
+  getNGOStats,
+  getNGOEvents,
+  getNGORegistrations,
+  getNGOCoordinators,
+  updateEvent,
+} from '../../services/eventService';
 import Loader from '../../components/ui/Loader';
 import ManageCoordinatorsTab from './ManageCoordinatorsTab';
+import EditEventModal from './EditEventModal';
 
 export default function NGODashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -227,37 +234,37 @@ function OverviewTab({ stats, events }) {
 
 function ManageEventsTab({ events, coordinators = [], onRefresh }) {
   const [editingEvent, setEditingEvent] = useState(null);
+  const [assigningCoordinatorEvent, setAssigningCoordinatorEvent] = useState(null);
   const [coordinatorId, setCoordinatorId] = useState('');
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
 
-  const handleOpenEdit = (event) => {
+  const handleOpenAssignCoordinator = (event) => {
     const coordId =
       event.coordinatorId?._id ||
       event.coordinatorId?.id ||
       (typeof event.coordinatorId === 'string' ? event.coordinatorId : '');
-    setEditingEvent(event);
+    setAssigningCoordinatorEvent(event);
     setCoordinatorId(coordId || '');
     setEditError('');
   };
 
-  const handleCloseEdit = () => {
-    setEditingEvent(null);
+  const handleCloseAssignCoordinator = () => {
+    setAssigningCoordinatorEvent(null);
     setCoordinatorId('');
     setEditError('');
   };
 
   const handleSaveCoordinator = async (e) => {
     e.preventDefault();
-    if (!editingEvent?.id) return;
+    if (!assigningCoordinatorEvent?.id) return;
     setSaving(true);
     setEditError('');
     try {
-      const { updateEvent } = await import('../../services/eventService');
-      await updateEvent(editingEvent.id, {
+      await updateEvent(assigningCoordinatorEvent.id, {
         coordinatorId: coordinatorId || null,
       });
-      handleCloseEdit();
+      handleCloseAssignCoordinator();
       onRefresh?.();
     } catch (err) {
       setEditError(err.response?.data?.message || err.message || 'Failed to update');
@@ -315,11 +322,19 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
                       </Link>
                       <button
                         type="button"
-                        onClick={() => handleOpenEdit(event)}
+                        onClick={() => setEditingEvent(event)}
                         className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Edit / Assign Coordinator"
+                        title="Edit Event"
                       >
                         <Edit className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenAssignCoordinator(event)}
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Assign Coordinator"
+                      >
+                        <UserCheck className="h-5 w-5" />
                       </button>
                       <button
                         type="button"
@@ -380,12 +395,21 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
       )}
 
       {editingEvent && (
+        <EditEventModal
+          event={editingEvent}
+          coordinators={coordinators}
+          onClose={() => setEditingEvent(null)}
+          onSuccess={onRefresh}
+        />
+      )}
+
+      {assigningCoordinatorEvent && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="fixed inset-0 bg-black/50" onClick={handleCloseEdit} aria-hidden />
+            <div className="fixed inset-0 bg-black/50" onClick={handleCloseAssignCoordinator} aria-hidden />
             <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-2">Assign Coordinator</h3>
-              <p className="text-sm text-gray-600 mb-4">{editingEvent.title}</p>
+              <p className="text-sm text-gray-600 mb-4">{assigningCoordinatorEvent.title}</p>
               <form onSubmit={handleSaveCoordinator}>
                 {editError && (
                   <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">{editError}</div>
@@ -414,7 +438,7 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
                 <div className="flex gap-3 justify-end">
                   <button
                     type="button"
-                    onClick={handleCloseEdit}
+                    onClick={handleCloseAssignCoordinator}
                     className="px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50"
                   >
                     Cancel

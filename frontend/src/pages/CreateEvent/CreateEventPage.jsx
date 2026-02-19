@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, Plus, UserCheck } from 'lucide-react';
+import { Upload, X, Plus } from 'lucide-react';
 import { createEvent, getNGOCoordinators } from '../../services/eventService';
 
 export default function CreateEventPage() {

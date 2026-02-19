@@ -253,8 +253,17 @@ export const getEvents = asyncHandler(async (req, res) => {
   });
 });
 
+function isValidObjectId(id) {
+  if (!id || typeof id !== 'string') return false;
+  return /^[a-fA-F0-9]{24}$/.test(id);
+}
+
 export const getEventById = asyncHandler(async (req, res) => {
-  const event = await Event.findById(req.params.id)
+  const id = req.params.id;
+  if (!isValidObjectId(id)) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+  const event = await Event.findById(id)
     .populate('ngoId', 'name email')
     .populate('coordinatorId', 'name email')
     .lean();
