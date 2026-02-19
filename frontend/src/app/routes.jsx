@@ -40,6 +40,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/events" element={<EventListingPage />} />
+      <Route path="/events/explore" element={<Navigate to="/events" replace />} />
       <Route path="/events/:id" element={<EventDetailsPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
