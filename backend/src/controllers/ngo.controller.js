@@ -4,7 +4,10 @@ import { User } from '../models/User.model.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const getCoordinators = asyncHandler(async (req, res) => {
-  const coordinators = await User.find({ role: 'coordinator' })
+  const coordinators = await User.find({
+    role: 'coordinator',
+    createdBy: req.user._id,
+  })
     .select('name email createdAt')
     .sort({ createdAt: -1 })
     .lean();
@@ -69,7 +72,11 @@ export const createCoordinator = asyncHandler(async (req, res) => {
 export const deleteCoordinator = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const coordinator = await User.findOne({ _id: id, role: 'coordinator' });
+  const coordinator = await User.findOne({
+    _id: id,
+    role: 'coordinator',
+    createdBy: req.user._id,
+  });
   if (!coordinator) {
     return res.status(404).json({
       success: false,
@@ -170,106 +177,5 @@ export const getRegistrations = asyncHandler(async (req, res) => {
     success: true,
     data,
     registrations: data,
-  });
-});
-
-export const createCoordinator = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: 'Name, email, and password are required',
-    });
-  }
-
-  if (typeof password !== 'string' || password.length < 6) {
-    return res.status(400).json({
-      success: false,
-      message: 'Password must be at least 6 characters',
-    });
-  }
-
-  const existing = await User.findOne({ email: String(email).toLowerCase() });
-  if (existing) {
-    return res.status(400).json({
-      success: false,
-      message: 'Email already registered',
-    });
-  }
-
-  const organization = req.user.organization?.trim();
-  if (!organization) {
-    return res.status(400).json({
-      success: false,
-      message: 'Your organization must be set to create coordinators',
-    });
-  }
-
-  const coordinator = await User.create({
-    name: String(name).trim(),
-    email: String(email).toLowerCase(),
-    password,
-    role: 'coordinator',
-    organization,
-    createdBy: req.user._id,
-  });
-
-  res.status(201).json({
-    success: true,
-    data: {
-      id: coordinator._id,
-      name: coordinator.name,
-      email: coordinator.email,
-      role: coordinator.role,
-      organization: coordinator.organization,
-    },
-  });
-});
-
-export const getCoordinators = asyncHandler(async (req, res) => {
-  const coordinators = await User.find({
-    role: 'coordinator',
-    createdBy: req.user._id,
-  })
-    .select('-password')
-    .sort({ createdAt: -1 })
-    .lean();
-
-  const data = coordinators.map((c) => ({
-    id: c._id,
-    name: c.name,
-    email: c.email,
-    role: c.role,
-    organization: c.organization,
-    createdAt: c.createdAt,
-  }));
-
-  res.json({
-    success: true,
-    data,
-    coordinators: data,
-  });
-});
-
-export const deleteCoordinator = asyncHandler(async (req, res) => {
-  const coordinator = await User.findOne({
-    _id: req.params.id,
-    role: 'coordinator',
-    createdBy: req.user._id,
-  });
-
-  if (!coordinator) {
-    return res.status(404).json({
-      success: false,
-      message: 'Coordinator not found or you do not have permission to delete them',
-    });
-  }
-
-  await User.findByIdAndDelete(coordinator._id);
-
-  res.json({
-    success: true,
-    message: 'Coordinator deleted',
   });
 });

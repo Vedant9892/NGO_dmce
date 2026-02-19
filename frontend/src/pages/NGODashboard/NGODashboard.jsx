@@ -14,11 +14,15 @@ export default function NGODashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const refreshCoordinators = () => {
+  const refreshCoordinators = () =>
     getNGOCoordinators()
       .then((list) => setCoordinators(Array.isArray(list) ? list : []))
       .catch(() => setCoordinators([]));
-  };
+
+  const refreshEvents = () =>
+    getNGOEvents()
+      .then((data) => setEvents(Array.isArray(data) ? data : (data?.events ?? [])))
+      .catch(() => setEvents([]));
 
   useEffect(() => {
     let cancelled = false;
@@ -116,14 +120,16 @@ export default function NGODashboard() {
         </div>
 
         {activeTab === 'overview' && <OverviewTab stats={statValues} events={events} />}
-        {activeTab === 'events' && <ManageEventsTab events={events} />}
+        {activeTab === 'events' && (
+          <ManageEventsTab
+            events={events}
+            coordinators={coordinators}
+            onRefresh={refreshEvents}
+          />
+        )}
         {activeTab === 'registrations' && <RegistrationsTab registrations={registrations} />}
         {activeTab === 'coordinators' && (
-          <ManageCoordinatorsTab
-            coordinators={coordinators}
-            onRefresh={refreshCoordinators}
-            isLoading={loading}
-          />
+          <ManageCoordinatorsTab coordinators={coordinators} onRefresh={refreshCoordinators} />
         )}
         {activeTab === 'attendance' && <AttendanceTab events={events} />}
         {activeTab === 'reports' && <ReportsTab />}
@@ -219,7 +225,47 @@ function OverviewTab({ stats, events }) {
   );
 }
 
-function ManageEventsTab({ events }) {
+function ManageEventsTab({ events, coordinators = [], onRefresh }) {
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [coordinatorId, setCoordinatorId] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  const handleOpenEdit = (event) => {
+    const coordId =
+      event.coordinatorId?._id ||
+      event.coordinatorId?.id ||
+      (typeof event.coordinatorId === 'string' ? event.coordinatorId : '');
+    setEditingEvent(event);
+    setCoordinatorId(coordId || '');
+    setEditError('');
+  };
+
+  const handleCloseEdit = () => {
+    setEditingEvent(null);
+    setCoordinatorId('');
+    setEditError('');
+  };
+
+  const handleSaveCoordinator = async (e) => {
+    e.preventDefault();
+    if (!editingEvent?.id) return;
+    setSaving(true);
+    setEditError('');
+    try {
+      const { updateEvent } = await import('../../services/eventService');
+      await updateEvent(editingEvent.id, {
+        coordinatorId: coordinatorId || null,
+      });
+      handleCloseEdit();
+      onRefresh?.();
+    } catch (err) {
+      setEditError(err.response?.data?.message || err.message || 'Failed to update');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -253,6 +299,11 @@ function ManageEventsTab({ events }) {
                       <p className="text-sm text-gray-600">
                         {event.location || 'TBD'} • {event.mode || 'Offline'}
                       </p>
+                      {event.coordinatorId && (
+                        <p className="text-sm text-blue-600 mt-1">
+                          Coordinator: {event.coordinatorId?.name || event.coordinatorId}
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center space-x-2">
                       <Link
@@ -263,12 +314,15 @@ function ManageEventsTab({ events }) {
                         <Eye className="h-5 w-5" />
                       </Link>
                       <button
+                        type="button"
+                        onClick={() => handleOpenEdit(event)}
                         className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Edit"
+                        title="Edit / Assign Coordinator"
                       >
                         <Edit className="h-5 w-5" />
                       </button>
                       <button
+                        type="button"
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete"
                       >
@@ -322,6 +376,60 @@ function ManageEventsTab({ events }) {
           <Link to="/create-event" className="mt-4 inline-block text-blue-600 font-semibold hover:underline">
             Create Event
           </Link>
+        </div>
+      )}
+
+      {editingEvent && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black/50" onClick={handleCloseEdit} aria-hidden />
+            <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Assign Coordinator</h3>
+              <p className="text-sm text-gray-600 mb-4">{editingEvent.title}</p>
+              <form onSubmit={handleSaveCoordinator}>
+                {editError && (
+                  <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">{editError}</div>
+                )}
+                <div className="mb-6">
+                  <label htmlFor="edit-coordinatorId" className="block text-sm font-semibold text-gray-700 mb-1">
+                    Coordinator
+                  </label>
+                  <select
+                    id="edit-coordinatorId"
+                    value={coordinatorId}
+                    onChange={(e) => setCoordinatorId(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    <option value="">None</option>
+                    {coordinators.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} ({c.email})
+                      </option>
+                    ))}
+                  </select>
+                  {coordinators.length === 0 && (
+                    <p className="text-sm text-gray-500 mt-1">Add coordinators in Manage Coordinators first.</p>
+                  )}
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={handleCloseEdit}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-lg disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </div>

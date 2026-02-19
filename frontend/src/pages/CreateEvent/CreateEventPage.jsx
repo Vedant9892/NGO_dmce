@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, Plus } from 'lucide-react';
-import { createEvent } from '../../services/eventService';
+import { Upload, X, Plus, UserCheck } from 'lucide-react';
+import { createEvent, getNGOCoordinators } from '../../services/eventService';
 
 export default function CreateEventPage() {
   const navigate = useNavigate();
@@ -10,8 +10,13 @@ export default function CreateEventPage() {
   const [currentSkill, setCurrentSkill] = useState('');
   const [bannerFile, setBannerFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [coordinators, setCoordinators] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    getNGOCoordinators().then((list) => setCoordinators(Array.isArray(list) ? list : []));
+  }, []);
 
   const handleAddSkill = () => {
     const trimmed = currentSkill.trim();
@@ -78,6 +83,8 @@ export default function CreateEventPage() {
     formData.append('roles', form.querySelector('#roles')?.value || '');
     formData.append('eligibility', form.querySelector('#eligibility')?.value || '');
     formData.append('perks', form.querySelector('#perks')?.value || '');
+    const coordinatorId = form.querySelector('#coordinatorId')?.value;
+    if (coordinatorId) formData.append('coordinatorId', coordinatorId);
     formData.append('bannerImage', bannerFile);
 
     try {
@@ -312,6 +319,29 @@ export default function CreateEventPage() {
                     </span>
                   ))}
                 </div>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="coordinatorId" className="block text-sm font-semibold text-gray-700 mb-2">
+                Assign Coordinator
+              </label>
+              <select
+                id="coordinatorId"
+                name="coordinatorId"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value="">None</option>
+                {coordinators.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.email})
+                  </option>
+                ))}
+              </select>
+              {coordinators.length === 0 && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Add coordinators in Manage Coordinators to assign them to events.
+                </p>
               )}
             </div>
 

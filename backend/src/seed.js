@@ -26,6 +26,7 @@ const seed = async () => {
       password: '123456',
       role: 'coordinator',
       organization: 'Helping Hands',
+      createdBy: ngo._id,
     });
 
     const volunteers = await User.insertMany([
