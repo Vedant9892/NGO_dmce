@@ -12,9 +12,11 @@ const registrationSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    appliedRole: { type: String, trim: true },
+    offeredRole: { type: String, trim: true },
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'attended', 'cancelled'],
+      enum: ['pending', 'approved', 'rejected', 'role_offered', 'declined', 'confirmed', 'attended', 'cancelled'],
       default: 'pending',
     },
     attendedAt: {

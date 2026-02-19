@@ -53,7 +53,14 @@ const eventSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    roles: [String],
+    eventRoles: [
+      {
+        title: { type: String, required: true },
+        requiredSkills: [String],
+        slots: { type: Number, default: 0 },
+        filledSlots: { type: Number, default: 0 },
+      },
+    ],
     eligibility: [String],
     timeline: [
       {

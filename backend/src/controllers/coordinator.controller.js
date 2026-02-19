@@ -16,9 +16,9 @@ export const getEventVolunteers = asyncHandler(async (req, res) => {
 
   const regs = await Registration.find({
     eventId: event._id,
-    status: { $in: ['pending', 'confirmed', 'attended'] },
+    status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended', 'rejected', 'declined'] },
   })
-    .populate('volunteerId', 'name email')
+    .populate('volunteerId', 'name email skills experienceLevel')
     .sort({ createdAt: -1 })
     .lean();
 
@@ -27,6 +27,10 @@ export const getEventVolunteers = asyncHandler(async (req, res) => {
     volunteerId: r.volunteerId?._id,
     name: r.volunteerId?.name,
     email: r.volunteerId?.email,
+    skills: r.volunteerId?.skills || [],
+    experienceLevel: r.volunteerId?.experienceLevel || null,
+    appliedRole: r.appliedRole || null,
+    offeredRole: r.offeredRole || null,
     status: r.status,
     attendedAt: r.attendedAt,
   }));
@@ -44,7 +48,7 @@ export const getEvents = asyncHandler(async (req, res) => {
   for (const ev of events) {
     const count = await Registration.countDocuments({
       eventId: ev._id,
-      status: { $in: ['pending', 'confirmed', 'attended'] },
+      status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
     });
     result.push({
       ...ev,

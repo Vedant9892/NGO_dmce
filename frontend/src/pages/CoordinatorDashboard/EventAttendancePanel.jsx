@@ -13,6 +13,9 @@ import {
 import {
   getCoordinatorEventVolunteers,
   markAttendance,
+  approveRegistration,
+  rejectRegistration,
+  offerRole,
 } from '../../services/eventService';
 import Loader from '../../components/ui/Loader';
 
@@ -44,14 +47,95 @@ function StatusBadge({ status }) {
   const styles = {
     attended: 'bg-green-100 text-green-800',
     confirmed: 'bg-blue-100 text-blue-800',
+    approved: 'bg-blue-100 text-blue-800',
     pending: 'bg-amber-100 text-amber-800',
+    role_offered: 'bg-purple-100 text-purple-800',
+    rejected: 'bg-red-100 text-red-800',
+    declined: 'bg-gray-100 text-gray-600',
     cancelled: 'bg-gray-100 text-gray-600',
   };
-  const label = status === 'attended' ? 'Attended' : status === 'pending' ? 'Registered' : status === 'confirmed' ? 'Confirmed' : status || 'Unknown';
+  const labels = {
+    attended: 'Attended',
+    confirmed: 'Confirmed',
+    approved: 'Approved',
+    pending: 'Pending',
+    role_offered: 'Role Offered',
+    rejected: 'Rejected',
+    declined: 'Declined',
+    cancelled: 'Cancelled',
+  };
   return (
     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${styles[status] || styles.pending}`}>
-      {label}
+      {labels[status] || status || 'Unknown'}
     </span>
+  );
+}
+
+function OfferRoleModal({ event, registrationId, volunteerName, availableRoles, onClose, onSuccess }) {
+  const [selectedRole, setSelectedRole] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async () => {
+    if (!selectedRole?.trim() || loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await offerRole(registrationId, selectedRole.trim());
+      onSuccess?.();
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to offer role');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-2">Offer Different Role</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Select a role to offer to {volunteerName || 'this volunteer'}.
+        </p>
+        <select
+          value={selectedRole}
+          onChange={(e) => setSelectedRole(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
+        >
+          <option value="">Choose role...</option>
+          {availableRoles.map((r) => {
+            const filled = r.filledSlots ?? 0;
+            const slots = r.slots ?? 0;
+            const available = slots - filled;
+            if (available <= 0) return null;
+            return (
+              <option key={r.title} value={r.title}>
+                {r.title} ({available} spot{available !== 1 ? 's' : ''} left)
+              </option>
+            );
+          })}
+        </select>
+        {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!selectedRole || loading}
+            className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {loading ? 'Offering...' : 'Offer Role'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -60,6 +144,8 @@ export default function EventAttendancePanel({ event }) {
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [offerModalFor, setOfferModalFor] = useState(null);
 
   useEffect(() => {
     if (!event?.id) return;
@@ -75,7 +161,7 @@ export default function EventAttendancePanel({ event }) {
   const absent = total - attended;
   const percent = total > 0 ? Math.round((attended / total) * 100) : 0;
 
-  const notYetAttended = volunteers.filter((v) => v.status !== 'attended');
+  const notYetAttended = volunteers.filter((v) => ['approved', 'confirmed'].includes(v.status));
   const canMarkAll = notYetAttended.length > 0;
 
   const toggleSelect = (volunteerId) => {
@@ -115,6 +201,35 @@ export default function EventAttendancePanel({ event }) {
   const handleMarkAllPresent = () => {
     const ids = notYetAttended.map((v) => v.volunteerId).filter(Boolean);
     if (ids.length > 0) handleMarkAttendance(ids);
+  };
+
+  const refreshVolunteers = () => {
+    if (!event?.id) return;
+    getCoordinatorEventVolunteers(event.id)
+      .then((data) => setVolunteers(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  };
+
+  const handleApprove = async (regId) => {
+    if (actionLoadingId) return;
+    setActionLoadingId(regId);
+    try {
+      await approveRegistration(regId);
+      refreshVolunteers();
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleReject = async (regId) => {
+    if (actionLoadingId) return;
+    setActionLoadingId(regId);
+    try {
+      await rejectRegistration(regId);
+      refreshVolunteers();
+    } finally {
+      setActionLoadingId(null);
+    }
   };
 
   if (loading) {

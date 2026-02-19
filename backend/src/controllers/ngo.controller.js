@@ -103,7 +103,7 @@ export const getStats = asyncHandler(async (req, res) => {
   const [totalVolunteers, attendanceCount] = await Promise.all([
     Registration.distinct('volunteerId', {
       eventId: { $in: eventIds },
-      status: { $in: ['pending', 'confirmed', 'attended'] },
+      status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
     }).then((arr) => arr.length),
     Registration.countDocuments({
       eventId: { $in: eventIds },
@@ -113,7 +113,7 @@ export const getStats = asyncHandler(async (req, res) => {
 
   const totalRegs = await Registration.countDocuments({
     eventId: { $in: eventIds },
-    status: { $in: ['pending', 'confirmed', 'attended'] },
+    status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
   });
 
   const attendanceRate = totalRegs > 0 ? Math.round((attendanceCount / totalRegs) * 100) : 0;
@@ -137,7 +137,7 @@ export const getEvents = asyncHandler(async (req, res) => {
   for (const ev of events) {
     const count = await Registration.countDocuments({
       eventId: ev._id,
-      status: { $in: ['pending', 'confirmed', 'attended'] },
+      status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
     });
     result.push({
       ...ev,
@@ -169,6 +169,8 @@ export const getRegistrations = asyncHandler(async (req, res) => {
     volunteerName: r.volunteerId?.name,
     volunteerEmail: r.volunteerId?.email,
     eventName: r.eventId?.title,
+    appliedRole: r.appliedRole || null,
+    offeredRole: r.offeredRole || null,
     date: r.createdAt,
     status: r.status,
   }));

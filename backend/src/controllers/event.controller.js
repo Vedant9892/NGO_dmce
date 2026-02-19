@@ -62,6 +62,27 @@ function parseArrayField(val) {
   return val ? [val] : [];
 }
 
+function parseEventRoles(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) {
+    return val.map((r) => ({
+      title: typeof r === 'string' ? r : (r?.title || ''),
+      requiredSkills: Array.isArray(r?.requiredSkills) ? r.requiredSkills : parseArrayField(r?.requiredSkills || []),
+      slots: parseInt(r?.slots, 10) || 0,
+      filledSlots: parseInt(r?.filledSlots, 10) || 0,
+    })).filter((r) => r.title);
+  }
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      return parseEventRoles(parsed);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 export const createEvent = asyncHandler(async (req, res) => {
   const {
     title,
@@ -72,8 +93,8 @@ export const createEvent = asyncHandler(async (req, res) => {
     date,
     registrationDeadline,
     skills,
-    volunteersRequired,
-    roles,
+    volunteersRequired: bodyVolunteersRequired,
+    eventRoles: bodyEventRoles,
     eligibility,
     timeline,
     perks,
@@ -102,6 +123,11 @@ export const createEvent = asyncHandler(async (req, res) => {
     }
   }
 
+  const eventRoles = parseEventRoles(bodyEventRoles);
+  const totalFromRoles = eventRoles.reduce((s, r) => s + (r.slots || 0), 0);
+  const volunteersRequired =
+    totalFromRoles > 0 ? totalFromRoles : parseInt(bodyVolunteersRequired, 10) || 0;
+
   const event = await Event.create({
     title,
     ngoId: req.user._id,
@@ -114,8 +140,8 @@ export const createEvent = asyncHandler(async (req, res) => {
     registrationDeadline: registrationDeadline ? new Date(registrationDeadline) : undefined,
     bannerImage,
     skills: parseArrayField(skills),
-    volunteersRequired: parseInt(volunteersRequired, 10) || 0,
-    roles: parseArrayField(roles),
+    volunteersRequired,
+    eventRoles: eventRoles.length > 0 ? eventRoles : undefined,
     eligibility: parseArrayField(eligibility),
     timeline: Array.isArray(timeline) ? timeline : typeof timeline === 'string' ? (() => { try { const t = JSON.parse(timeline); return Array.isArray(t) ? t : []; } catch { return []; } })() : [],
     perks: parseArrayField(perks),
@@ -169,7 +195,7 @@ export const updateEvent = asyncHandler(async (req, res) => {
     'registrationDeadline',
     'skills',
     'volunteersRequired',
-    'roles',
+    'eventRoles',
     'eligibility',
     'timeline',
     'perks',
@@ -186,6 +212,12 @@ export const updateEvent = asyncHandler(async (req, res) => {
     if (req.body[key] === undefined) continue;
     if (key === 'date' || key === 'registrationDeadline') {
       updates[key] = new Date(req.body[key]);
+    } else if (key === 'eventRoles') {
+      const parsed = parseEventRoles(req.body[key]);
+      if (parsed.length > 0) {
+        updates.eventRoles = parsed;
+        updates.volunteersRequired = parsed.reduce((s, r) => s + (r.slots || 0), 0);
+      }
     } else if (key === 'coordinatorId') {
       if (!req.body[key]) {
         updates[key] = null;
@@ -245,7 +277,7 @@ export const getEvents = asyncHandler(async (req, res) => {
     if (!ev || !ev._id) continue;
     const count = await Registration.countDocuments({
       eventId: ev._id,
-      status: { $in: ['pending', 'confirmed', 'attended'] },
+      status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
     });
     result.push(formatEvent({ ...ev, volunteersRegistered: count }));
   }
@@ -278,7 +310,7 @@ export const getEventById = asyncHandler(async (req, res) => {
 
   const registrations = await Registration.countDocuments({
     eventId: event._id,
-    status: { $in: ['pending', 'confirmed', 'attended'] },
+    status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
   });
 
   res.json({
@@ -298,6 +330,8 @@ export const registerForEvent = asyncHandler(async (req, res) => {
     });
   }
   const id = req.params.id;
+  const appliedRole = typeof req.body?.appliedRole === 'string' ? req.body.appliedRole.trim() : null;
+
   if (!isValidObjectId(id)) {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }
@@ -306,14 +340,40 @@ export const registerForEvent = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }
 
-  const capacity = event.volunteersRequired || 0;
-  const count = await Registration.countDocuments({
-    eventId: event._id,
-    status: { $in: ['pending', 'confirmed', 'attended'] },
-  });
+  const eventRoles = event.eventRoles || [];
+  const usesEventRoles = eventRoles.length > 0;
 
-  if (capacity > 0 && count >= capacity) {
-    return res.status(400).json({ success: false, message: 'Event is full' });
+  if (usesEventRoles) {
+    if (!appliedRole) {
+      return res.status(400).json({
+        success: false,
+        message: 'appliedRole is required when event has role-based slots',
+      });
+    }
+    const roleDef = eventRoles.find((r) => r.title && r.title.trim().toLowerCase() === appliedRole.toLowerCase());
+    if (!roleDef) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid role. Must be one of: ${eventRoles.map((r) => r.title).join(', ')}`,
+      });
+    }
+    const filled = roleDef.filledSlots ?? 0;
+    const slots = roleDef.slots ?? 0;
+    if (filled >= slots) {
+      return res.status(400).json({
+        success: false,
+        message: `Role "${roleDef.title}" has no slots available`,
+      });
+    }
+  } else {
+    const capacity = event.volunteersRequired || 0;
+    const count = await Registration.countDocuments({
+      eventId: event._id,
+      status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
+    });
+    if (capacity > 0 && count >= capacity) {
+      return res.status(400).json({ success: false, message: 'Event is full' });
+    }
   }
 
   const exists = await Registration.findOne({
@@ -328,7 +388,7 @@ export const registerForEvent = asyncHandler(async (req, res) => {
   session.startTransaction();
   try {
     await Registration.create(
-      [{ eventId: event._id, volunteerId: req.user._id }],
+      [{ eventId: event._id, volunteerId: req.user._id, appliedRole: usesEventRoles ? appliedRole : undefined, status: 'pending' }],
       { session }
     );
     await Event.findByIdAndUpdate(
@@ -336,6 +396,7 @@ export const registerForEvent = asyncHandler(async (req, res) => {
       { $addToSet: { registeredVolunteers: req.user._id } },
       { session }
     );
+    // filledSlots incremented on coordinator approval, not on registration
     await session.commitTransaction();
   } catch (err) {
     await session.abortTransaction();

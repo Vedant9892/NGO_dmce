@@ -7,7 +7,7 @@ export const getStats = asyncHandler(async (req, res) => {
 
   const regs = await Registration.find({
     volunteerId,
-    status: { $in: ['pending', 'confirmed', 'attended'] },
+    status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
   })
     .populate('eventId')
     .lean();
@@ -16,7 +16,7 @@ export const getStats = asyncHandler(async (req, res) => {
   const completed = regs.filter((r) => r.status === 'attended').length;
   const upcoming = regs.filter(
     (r) =>
-      ['pending', 'confirmed'].includes(r.status) &&
+      ['pending', 'approved', 'role_offered', 'confirmed'].includes(r.status) &&
       r.eventId &&
       new Date(r.eventId.date) >= new Date()
   ).length;
@@ -56,7 +56,7 @@ export const getEvents = asyncHandler(async (req, res) => {
 
   const regs = await Registration.find({
     volunteerId,
-    status: { $in: ['pending', 'confirmed', 'attended'] },
+    status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
   })
     .populate({
       path: 'eventId',
@@ -73,6 +73,10 @@ export const getEvents = asyncHandler(async (req, res) => {
       ...r.eventId,
       id: r.eventId._id,
       ngoName: r.eventId.ngoId?.name || 'NGO',
+      appliedRole: r.appliedRole || null,
+      offeredRole: r.offeredRole || null,
+      registrationStatus: r.status,
+      registrationId: r._id,
     };
     if (r.status === 'attended') {
       completed.push(ev);

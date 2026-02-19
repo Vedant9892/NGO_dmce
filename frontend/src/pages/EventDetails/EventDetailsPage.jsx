@@ -1,9 +1,82 @@
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { MapPin, Calendar, Users, Mail, Share2, Bookmark, Clock, CheckCircle, Award, ArrowLeft, UserCheck } from 'lucide-react';
+import { MapPin, Calendar, Users, Mail, Share2, Bookmark, Clock, CheckCircle, Award, ArrowLeft, UserCheck, X } from 'lucide-react';
 import { getEventById, registerForEvent, getCoordinatorEventVolunteers, markAttendance } from '../../services/eventService';
 import { useAuth } from '../../hooks/useAuth';
 import Loader from '../../components/ui/Loader';
+
+function RoleSelectModal({ eventRoles, selectedRole, onSelect, onSubmit, onClose, loading }) {
+  const availableRoles = eventRoles.filter((r) => {
+    const filled = r.filledSlots ?? 0;
+    const slots = r.slots ?? 0;
+    return slots > 0 && filled < slots;
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-900">Select a Role</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 text-gray-500 hover:text-gray-700 rounded"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          Choose the role you would like to apply for in this event.
+        </p>
+        <div className="space-y-2 mb-6">
+          {availableRoles.map((role) => {
+            const filled = role.filledSlots ?? 0;
+            const slots = role.slots ?? 0;
+            const available = slots - filled;
+            return (
+              <label
+                key={role.title}
+                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer ${
+                  selectedRole === role.title ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="role"
+                    value={role.title}
+                    checked={selectedRole === role.title}
+                    onChange={() => onSelect(role.title)}
+                    className="rounded-full"
+                  />
+                  <span className="font-medium text-gray-900">{role.title}</span>
+                </div>
+                <span className="text-sm text-gray-500">{available} spot(s) left</span>
+              </label>
+            );
+          })}
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={!selectedRole || loading}
+            className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Registering...' : 'Submit Registration'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function EventDetailsPage() {
   const { id } = useParams();
@@ -17,6 +90,8 @@ export default function EventDetailsPage() {
   const [error, setError] = useState(null);
   const [registering, setRegistering] = useState(false);
   const [registered, setRegistered] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('');
   const [volunteers, setVolunteers] = useState([]);
   const [selectedVolunteers, setSelectedVolunteers] = useState([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
@@ -73,19 +148,38 @@ export default function EventDetailsPage() {
     );
   };
 
-  const handleRegister = async () => {
+  const eventRoles = event?.eventRoles ?? [];
+  const hasEventRoles = eventRoles.length > 0;
+
+  const handleRegisterClick = () => {
     if (!token) {
       window.location.href = '/login';
       return;
     }
     if (!event?.id || registering || registered) return;
+    if (hasEventRoles) {
+      setSelectedRole(eventRoles[0]?.title ?? '');
+      setShowRoleModal(true);
+    } else {
+      handleRegister(null);
+    }
+  };
+
+  const handleRegister = async (appliedRole = null) => {
+    if (!event?.id || registering || registered) return;
     setRegistering(true);
+    setShowRoleModal(false);
     try {
-      await registerForEvent(event.id);
+      await registerForEvent(event.id, appliedRole ? { appliedRole } : {});
       setRegistered(true);
     } catch {
       setRegistering(false);
     }
+  };
+
+  const handleRoleModalSubmit = () => {
+    if (!selectedRole?.trim()) return;
+    handleRegister(selectedRole.trim());
   };
 
   if (loading) {
@@ -109,9 +203,15 @@ export default function EventDetailsPage() {
     );
   }
 
+  const eventRoles = event.eventRoles ?? [];
+  const hasEventRoles = eventRoles.length > 0;
   const volunteersRequired = event.volunteersRequired ?? 0;
   const volunteersRegistered = event.volunteersRegistered ?? 0;
-  const spotsLeft = Math.max(0, volunteersRequired - volunteersRegistered);
+  const totalRoleSlots = eventRoles.reduce((sum, r) => sum + (r.slots ?? 0), 0);
+  const filledRoleSlots = eventRoles.reduce((sum, r) => sum + (r.filledSlots ?? 0), 0);
+  const spotsLeft = hasEventRoles
+    ? Math.max(0, totalRoleSlots - filledRoleSlots)
+    : Math.max(0, volunteersRequired - volunteersRegistered);
   const roles = event.roles ?? [];
   const eligibility = event.eligibility ?? [];
   const skills = event.skills ?? [];
@@ -276,13 +376,25 @@ export default function EventDetailsPage() {
               </div>
 
               {isVolunteer && (
-                <button
-                  onClick={handleRegister}
-                  disabled={registering || spotsLeft <= 0 || registered}
-                  className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  {registered ? 'Registered' : registering ? 'Registering...' : spotsLeft <= 0 ? 'Event Full' : 'Register Now'}
-                </button>
+                <>
+                  <button
+                    onClick={handleRegisterClick}
+                    disabled={registering || spotsLeft <= 0 || registered}
+                    className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {registered ? 'Registered' : registering ? 'Registering...' : spotsLeft <= 0 ? 'Event Full' : 'Register Now'}
+                  </button>
+                  {showRoleModal && hasEventRoles && (
+                    <RoleSelectModal
+                      eventRoles={eventRoles}
+                      selectedRole={selectedRole}
+                      onSelect={setSelectedRole}
+                      onSubmit={handleRoleModalSubmit}
+                      onClose={() => setShowRoleModal(false)}
+                      loading={registering}
+                    />
+                  )}
+                </>
               )}
               {!token && (
                 <Link

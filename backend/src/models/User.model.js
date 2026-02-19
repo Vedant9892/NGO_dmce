@@ -32,6 +32,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    skills: [String],
+    experienceLevel: {
+      type: String,
+      enum: ['Beginner', 'Intermediate', 'Advanced'],
+    },
+    preferredRoles: [String],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

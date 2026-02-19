@@ -372,6 +372,68 @@ function CertificatesTab({ certificates }) {
 }
 
 function ProfileTab() {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [skillsInput, setSkillsInput] = useState('');
+  const [experienceLevel, setExperienceLevel] = useState('');
+  const [message, setMessage] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    import('../../services/userService')
+      .then(({ getProfile }) => getProfile())
+      .then((data) => {
+        if (!cancelled && data) {
+          setProfile(data);
+          setSkillsInput(Array.isArray(data.skills) ? data.skills.join(', ') : '');
+          setExperienceLevel(data.experienceLevel || '');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setProfile(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleSave = async () => {
+    if (!profile || saving) return;
+    setSaving(true);
+    setMessage(null);
+    try {
+      const skills = skillsInput
+        .split(/[,/\n]/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const data = await import('../../services/userService').then(({ updateProfile }) =>
+        updateProfile({ skills, experienceLevel: experienceLevel || undefined })
+      );
+      if (data) {
+        setProfile(data);
+        setSkillsInput(Array.isArray(data.skills) ? data.skills.join(', ') : '');
+        setExperienceLevel(data.experienceLevel || '');
+        setMessage({ type: 'success', text: 'Profile updated successfully' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to update profile' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl">
+        <div className="bg-white rounded-xl shadow-md p-8 flex justify-center">
+          <Loader size="md" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl">
       <div className="bg-white rounded-xl shadow-md p-8">
@@ -382,53 +444,61 @@ function ProfileTab() {
             <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
             <input
               type="text"
-              placeholder="Your name"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={profile?.name ?? ''}
+              readOnly
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
             />
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
             <input
               type="email"
-              placeholder="your@email.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
-            <input
-              type="tel"
-              placeholder="+91 XXXXX XXXXX"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-            <input
-              type="text"
-              placeholder="City, Country"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={profile?.email ?? ''}
+              readOnly
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
             />
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Skills</label>
             <input
               type="text"
-              placeholder="e.g., Teaching, Communication"
+              placeholder="e.g., Teaching, Communication, Leadership"
+              value={skillsInput}
+              onChange={(e) => setSkillsInput(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+            <p className="text-xs text-gray-500 mt-1">Separate skills with commas</p>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
-            <textarea
-              rows={4}
-              placeholder="Tell us about yourself"
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Experience Level</label>
+            <select
+              value={experienceLevel}
+              onChange={(e) => setExperienceLevel(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            >
+              <option value="">Select level</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
           </div>
 
-          <button className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 rounded-lg hover:shadow-lg transition-all">
-            Save Changes
+          {message && (
+            <div
+              className={`p-3 rounded-lg text-sm ${
+                message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+              }`}
+            >
+              {message.text}
+            </div>
+          )}
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </div>

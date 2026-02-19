@@ -31,8 +31,8 @@ export const updateEvent = async (eventId, payload) => {
   return data;
 };
 
-export const registerForEvent = async (eventId) => {
-  const { data } = await api.post(`/events/${eventId}/register`);
+export const registerForEvent = async (eventId, body = {}) => {
+  const { data } = await api.post(`/events/${eventId}/register`, body);
   return data;
 };
 
@@ -142,5 +142,30 @@ export const createNGOCoordinator = async (payload) => {
 
 export const deleteNGOCoordinator = async (id) => {
   const { data } = await api.delete(`/ngo/coordinators/${id}`);
+  return data;
+};
+
+export const approveRegistration = async (registrationId) => {
+  const { data } = await api.put(`/registrations/${registrationId}/approve`);
+  return data;
+};
+
+export const rejectRegistration = async (registrationId) => {
+  const { data } = await api.put(`/registrations/${registrationId}/reject`);
+  return data;
+};
+
+export const offerRole = async (registrationId, offeredRole) => {
+  const { data } = await api.put(`/registrations/${registrationId}/offer-role`, { offeredRole });
+  return data;
+};
+
+export const acceptOffer = async (registrationId) => {
+  const { data } = await api.put(`/registrations/${registrationId}/accept-offer`);
+  return data;
+};
+
+export const declineOffer = async (registrationId) => {
+  const { data } = await api.put(`/registrations/${registrationId}/decline-offer`);
   return data;
 };
