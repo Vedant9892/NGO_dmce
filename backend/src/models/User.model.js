@@ -36,8 +36,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.index({ email: 1 }, { unique: true });
-
 userSchema.pre('save', function (next) {
   if (['ngo', 'coordinator'].includes(this.role) && !this.organization?.trim()) {
     return next(new Error('Organization is required for NGO and coordinator roles'));
