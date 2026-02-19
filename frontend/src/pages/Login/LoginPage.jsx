@@ -40,7 +40,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Sign In</h1>
-          <p className="mt-2 text-gray-600">Welcome back to ServeSync</p>
+          <p className="mt-2 text-gray-600">Access your dashboard (Volunteer, Coordinator, or NGO)</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-8">
