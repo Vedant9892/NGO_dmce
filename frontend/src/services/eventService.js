@@ -1,9 +1,19 @@
 import api from './api';
 
 export const getEvents = async (params = {}) => {
-  const { data } = await api.get('/events', { params });
-  const list = data?.events ?? data?.data ?? (Array.isArray(data) ? data : []);
-  return list;
+  try {
+    const sanitized = Object.fromEntries(
+      Object.entries(params).filter(([, v]) => v != null && v !== '')
+    );
+    const { data } = await api.get('/events', { params: sanitized });
+    const list = data?.events ?? data?.data ?? (Array.isArray(data) ? data : []);
+    return list;
+  } catch (err) {
+    if (err.response?.status === 400) {
+      throw new Error(err.response?.data?.message || 'Invalid request. Please try again.');
+    }
+    throw err;
+  }
 };
 
 export const getEventById = async (id) => {

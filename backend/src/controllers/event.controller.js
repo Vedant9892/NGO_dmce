@@ -216,6 +216,7 @@ export const getEvents = asyncHandler(async (req, res) => {
 
   const result = [];
   for (const ev of events) {
+    if (!ev || !ev._id) continue;
     const count = await Registration.countDocuments({
       eventId: ev._id,
       status: { $in: ['pending', 'confirmed', 'attended'] },

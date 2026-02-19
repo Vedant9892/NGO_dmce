@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, QrCode, BarChart3, Award, Heart, ArrowRight } from 'lucide-react';
+import { Search, QrCode, BarChart3, Award, Heart, ArrowRight, Calendar, Users, MapPin, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { getPlatformStats } from '../../services/eventService';
-import Loader from '../../components/ui/Loader';
+import { getPlatformStats, getEvents } from '../../services/eventService';
+import AnimatedCounter from '../../components/ui/AnimatedCounter';
+import StatSkeleton from '../../components/ui/StatSkeleton';
 
 export default function LandingPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [trendingEvents, setTrendingEvents] = useState([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     getPlatformStats()
       .then((data) => {
-        if (!cancelled) setStats(data);
+        if (!cancelled && data) setStats(data);
       })
       .catch(() => {
         if (!cancelled) setStats(null);
@@ -25,12 +28,23 @@ export default function LandingPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const formatStat = (value) => {
-    if (value == null || value === undefined) return '—';
-    if (typeof value === 'number' && value >= 1000) return `${Math.floor(value / 1000)}K+`;
-    if (typeof value === 'number') return `${value}+`;
-    return value;
-  };
+  useEffect(() => {
+    let cancelled = false;
+    getEvents()
+      .then((list) => {
+        if (!cancelled && Array.isArray(list)) {
+          const trending = list.filter((e) => e.trending).slice(0, 3);
+          setTrendingEvents(trending);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setTrendingEvents([]);
+      })
+      .finally(() => {
+        if (!cancelled) setTrendingLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="bg-white">
@@ -81,39 +95,116 @@ export default function LandingPage() {
               )}
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              {statsLoading ? (
-                <Loader size="sm" />
-              ) : (
-                <div className="text-4xl font-bold text-blue-600 mb-2">
-                  {formatStat(stats?.totalEvents)}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Global Impact</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {statsLoading ? (
+              <>
+                {[1, 2, 3, 4].map((i) => (
+                  <StatSkeleton key={i} />
+                ))}
+              </>
+            ) : stats ? (
+              <>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-1">
+                    <AnimatedCounter value={stats.totalEvents ?? 0} />
+                  </div>
+                  <div className="text-gray-600 flex items-center justify-center gap-1">
+                    <Calendar className="h-4 w-4 text-gray-400" />
+                    Total Events
+                  </div>
                 </div>
-              )}
-              <div className="text-gray-600">Active Events</div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              {statsLoading ? (
-                <Loader size="sm" />
-              ) : (
-                <div className="text-4xl font-bold text-green-500 mb-2">
-                  {formatStat(stats?.totalVolunteers)}
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-green-500 mb-1">
+                    <AnimatedCounter value={stats.totalVolunteers ?? 0} />
+                  </div>
+                  <div className="text-gray-600 flex items-center justify-center gap-1">
+                    <Users className="h-4 w-4 text-gray-400" />
+                    Total Volunteers
+                  </div>
                 </div>
-              )}
-              <div className="text-gray-600">Volunteers</div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              {statsLoading ? (
-                <Loader size="sm" />
-              ) : (
-                <div className="text-4xl font-bold text-blue-600 mb-2">
-                  {formatStat(stats?.totalNGOs)}
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-1">
+                    <AnimatedCounter value={stats.totalAttendanceMarked ?? 0} />
+                  </div>
+                  <div className="text-gray-600 flex items-center justify-center gap-1">
+                    <Award className="h-4 w-4 text-gray-400" />
+                    Total Attendance
+                  </div>
                 </div>
-              )}
-              <div className="text-gray-600">NGO Partners</div>
-            </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-green-500 mb-1">
+                    <AnimatedCounter value={stats.citiesCovered ?? 0} />
+                  </div>
+                  <div className="text-gray-600 flex items-center justify-center gap-1">
+                    <MapPin className="h-4 w-4 text-gray-400" />
+                    Cities Covered
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="col-span-2 md:col-span-4 text-center py-8 text-gray-500">
+                Stats unavailable. Please try again later.
+              </div>
+            )}
           </div>
+        </div>
+      </section>
+
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-2 mb-8">
+            <TrendingUp className="h-6 w-6 text-orange-500" />
+            <h2 className="text-2xl font-bold text-gray-900">Trending Events</h2>
+          </div>
+          {trendingLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse">
+                  <div className="h-40 bg-gray-200" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-5 bg-gray-200 rounded w-3/4" />
+                    <div className="h-4 bg-gray-100 rounded w-full" />
+                    <div className="h-4 bg-gray-100 rounded w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : trendingEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {trendingEvents.map((event) => (
+                <Link
+                  key={event.id}
+                  to={`/events/${event.id}`}
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden block"
+                >
+                  <div className="relative h-40 overflow-hidden">
+                    <img
+                      src={event.bannerImage || 'https://placehold.co/600x300?text=Event'}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      Trending
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 line-clamp-2 mb-1">{event.title}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-2">{event.description || ''}</p>
+                    <p className="text-sm text-blue-600 font-medium mt-2">View details →</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-8">No trending events right now. Check back soon!</p>
+          )}
         </div>
       </section>
 
