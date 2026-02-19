@@ -173,7 +173,7 @@ function DashboardTab({ stats, registeredEvents }) {
             {registeredEvents.map((event) => (
               <Link
                 key={event.id}
-                to={`/events/${event.id}`}
+                to={`/events/${event.id ?? event._id}`}
                 className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
               >
                 <img
@@ -268,7 +268,7 @@ function EventsTab({ registeredEvents, completedEvents }) {
                     {event.location || 'TBD'}
                   </div>
                   <Link
-                    to={`/events/${event.id}`}
+                    to={`/events/${event.id ?? event._id}`}
                     className="block w-full text-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     View Details

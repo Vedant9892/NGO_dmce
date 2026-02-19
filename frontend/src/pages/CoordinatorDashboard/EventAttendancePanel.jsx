@@ -202,7 +202,7 @@ export default function EventAttendancePanel({ event }) {
             Export Attendance CSV
           </button>
           <Link
-            to={`/events/${event?.id}?markAttendance=true`}
+            to={`/events/${event?.id ?? event?._id}?markAttendance=true`}
             className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 flex items-center"
           >
             Full Attendance View

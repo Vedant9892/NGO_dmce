@@ -207,7 +207,7 @@ function OverviewTab({ stats, events }) {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Link
-                    to={`/events/${event.id}`}
+                    to={`/events/${event.id ?? event._id}`}
                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                   >
                     <Eye className="h-5 w-5" />
@@ -314,7 +314,7 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Link
-                        to={`/events/${event.id}`}
+                        to={`/events/${event.id ?? event._id}`}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="View"
                       >

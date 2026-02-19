@@ -14,8 +14,9 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = express.Router();
 
+// IMPORTANT: Static routes MUST come before dynamic :id routes.
+// GET /api/events must hit getEvents, not getEventById.
 router.get('/', getEvents);
-router.get('/:id', getEventById);
 
 router.post(
   '/',
@@ -29,6 +30,9 @@ router.post(
   },
   createEvent
 );
+
+// Dynamic :id routes (after all static routes)
+router.get('/:id', getEventById);
 
 router.put(
   '/:id',

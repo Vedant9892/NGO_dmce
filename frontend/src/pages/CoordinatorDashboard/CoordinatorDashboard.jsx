@@ -97,14 +97,14 @@ export default function CoordinatorDashboard() {
                         </div>
                         <div className="flex items-center space-x-2">
                           <Link
-                            to={`/events/${event.id}`}
+                            to={`/events/${event.id ?? event._id}`}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="View"
                           >
                             <Eye className="h-5 w-5" />
                           </Link>
                           <Link
-                            to={`/events/${event.id}?markAttendance=true`}
+                            to={`/events/${event.id ?? event._id}?markAttendance=true`}
                             className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
                           >
                             Mark Attendance

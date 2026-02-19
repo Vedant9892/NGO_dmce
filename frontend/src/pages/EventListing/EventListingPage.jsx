@@ -73,7 +73,7 @@ function EventCard({ event }) {
         )}
 
         <Link
-          to={`/events/${event.id}`}
+          to={`/events/${event.id ?? event._id}`}
           className="block w-full text-center px-4 py-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
         >
           View Details
@@ -232,7 +232,7 @@ export default function EventListingPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {trendingEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventCard key={event.id ?? event._id} event={event} />
               ))}
             </div>
           </div>
@@ -247,8 +247,8 @@ export default function EventListingPage() {
 
         {filteredEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
+          {filteredEvents.map((event) => (
+            <EventCard key={event.id ?? event._id} event={event} />
             ))}
           </div>
         ) : (

@@ -180,7 +180,7 @@ export default function LandingPage() {
               {trendingEvents.map((event) => (
                 <Link
                   key={event.id}
-                  to={`/events/${event.id}`}
+                  to={`/events/${event.id ?? event._id}`}
                   className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden block"
                 >
                   <div className="relative h-40 overflow-hidden">
