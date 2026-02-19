@@ -38,6 +38,13 @@ const userSchema = new mongoose.Schema(
 
 userSchema.index({ email: 1 }, { unique: true });
 
+userSchema.pre('save', function (next) {
+  if (['ngo', 'coordinator'].includes(this.role) && !this.organization?.trim()) {
+    return next(new Error('Organization is required for NGO and coordinator roles'));
+  }
+  next();
+});
+
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
