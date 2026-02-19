@@ -39,6 +39,15 @@ export const uploadBannerToSupabase = async (file) => {
   return urlData?.publicUrl || null;
 };
 
+const validateCoordinatorId = async (coordinatorId) => {
+  if (!coordinatorId) return null;
+  const user = await User.findById(coordinatorId).select('role');
+  if (!user || user.role !== 'coordinator') {
+    throw new Error('coordinatorId must reference a user with coordinator role');
+  }
+  return coordinatorId;
+};
+
 export const createEvent = asyncHandler(async (req, res) => {
   const {
     title,
@@ -55,10 +64,16 @@ export const createEvent = asyncHandler(async (req, res) => {
     timeline,
     perks,
     contactEmail,
+    coordinatorId: bodyCoordinatorId,
   } = req.body;
 
   if (!title) {
     return res.status(400).json({ success: false, message: 'Title is required' });
+  }
+
+  let coordinatorId = null;
+  if (bodyCoordinatorId) {
+    coordinatorId = await validateCoordinatorId(bodyCoordinatorId);
   }
 
   let bannerImage = null;
@@ -69,6 +84,7 @@ export const createEvent = asyncHandler(async (req, res) => {
   const event = await Event.create({
     title,
     ngoId: req.user._id,
+    coordinatorId,
     description,
     detailedDescription,
     location,
@@ -87,6 +103,7 @@ export const createEvent = asyncHandler(async (req, res) => {
 
   const populated = await Event.findById(event._id)
     .populate('ngoId', 'name email')
+    .populate('coordinatorId', 'name email')
     .lean();
 
   res.status(201).json({
@@ -101,19 +118,23 @@ export const updateEvent = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }
 
-  const isNGO = req.user.role === 'ngo' && event.ngoId.toString() === req.user._id.toString();
-  const isCoordinator =
-    req.user.role === 'coordinator' &&
-    event.coordinatorId?.toString() === req.user._id.toString();
+  const ngoIdStr = event.ngoId.toString();
+  const currentUserId = req.user._id.toString();
 
-  if (!isNGO && !isCoordinator) {
+  const isOwnerNGO = req.user.role === 'ngo' && ngoIdStr === currentUserId;
+  const isAssignedCoordinator =
+    req.user.role === 'coordinator' &&
+    event.coordinatorId &&
+    event.coordinatorId.toString() === currentUserId;
+
+  if (!isOwnerNGO && !isAssignedCoordinator) {
     return res.status(403).json({
       success: false,
       message: 'Not authorized to edit this event',
     });
   }
 
-  const allowed = [
+  const allowedForCoordinator = [
     'title',
     'description',
     'detailedDescription',
@@ -131,20 +152,25 @@ export const updateEvent = asyncHandler(async (req, res) => {
     'trending',
   ];
 
-  if (isNGO) {
-    allowed.push('coordinatorId');
-  }
+  const allowedForNGO = [...allowedForCoordinator, 'coordinatorId'];
+
+  const allowed = isOwnerNGO ? allowedForNGO : allowedForCoordinator;
 
   const updates = {};
-  allowed.forEach((key) => {
-    if (req.body[key] !== undefined) {
-      if (key === 'date' || key === 'registrationDeadline') {
-        updates[key] = new Date(req.body[key]);
+  for (const key of allowed) {
+    if (req.body[key] === undefined) continue;
+    if (key === 'date' || key === 'registrationDeadline') {
+      updates[key] = new Date(req.body[key]);
+    } else if (key === 'coordinatorId') {
+      if (!req.body[key]) {
+        updates[key] = null;
       } else {
-        updates[key] = req.body[key];
+        updates[key] = await validateCoordinatorId(req.body[key]);
       }
+    } else {
+      updates[key] = req.body[key];
     }
-  });
+  }
 
   if (req.file) {
     updates.bannerImage = await uploadBannerToSupabase(req.file);
@@ -171,7 +197,7 @@ export const getEvents = asyncHandler(async (req, res) => {
   for (const ev of events) {
     const count = await Registration.countDocuments({
       eventId: ev._id,
-      status: { $in: ['confirmed', 'attended'] },
+      status: { $in: ['pending', 'confirmed', 'attended'] },
     });
     result.push(formatEvent({ ...ev, volunteersRegistered: count }));
   }
@@ -195,7 +221,7 @@ export const getEventById = asyncHandler(async (req, res) => {
 
   const registrations = await Registration.countDocuments({
     eventId: event._id,
-    status: { $in: ['confirmed', 'attended'] },
+    status: { $in: ['pending', 'confirmed', 'attended'] },
   });
 
   res.json({
@@ -208,16 +234,25 @@ export const getEventById = asyncHandler(async (req, res) => {
 });
 
 export const registerForEvent = asyncHandler(async (req, res) => {
+  if (req.user.role !== 'volunteer') {
+    return res.status(403).json({
+      success: false,
+      message: 'Only volunteers can register for events',
+    });
+  }
+
   const event = await Event.findById(req.params.id);
   if (!event) {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }
 
+  const capacity = event.volunteersRequired || 0;
   const count = await Registration.countDocuments({
     eventId: event._id,
-    status: { $in: ['confirmed', 'attended'] },
+    status: { $in: ['pending', 'confirmed', 'attended'] },
   });
-  if (count >= (event.volunteersRequired || 0)) {
+
+  if (capacity > 0 && count >= capacity) {
     return res.status(400).json({ success: false, message: 'Event is full' });
   }
 
@@ -229,10 +264,25 @@ export const registerForEvent = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: 'Already registered' });
   }
 
-  await Registration.create({
-    eventId: event._id,
-    volunteerId: req.user._id,
-  });
+  const session = await Event.startSession();
+  session.startTransaction();
+  try {
+    await Registration.create(
+      [{ eventId: event._id, volunteerId: req.user._id }],
+      { session }
+    );
+    await Event.findByIdAndUpdate(
+      event._id,
+      { $addToSet: { registeredVolunteers: req.user._id } },
+      { session }
+    );
+    await session.commitTransaction();
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
 
   res.status(201).json({
     success: true,
@@ -241,15 +291,22 @@ export const registerForEvent = asyncHandler(async (req, res) => {
 });
 
 export const markAttendance = asyncHandler(async (req, res) => {
+  if (req.user.role !== 'coordinator') {
+    return res.status(403).json({
+      success: false,
+      message: 'Only assigned coordinators can mark attendance',
+    });
+  }
+
   const event = await Event.findById(req.params.id);
   if (!event) {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }
 
-  if (event.coordinatorId?.toString() !== req.user._id.toString()) {
+  if (!event.coordinatorId || event.coordinatorId.toString() !== req.user._id.toString()) {
     return res.status(403).json({
       success: false,
-      message: 'Only assigned coordinator can mark attendance',
+      message: 'Only the assigned coordinator can mark attendance for this event',
     });
   }
 
@@ -273,7 +330,8 @@ export const markAttendance = asyncHandler(async (req, res) => {
 });
 
 function formatEvent(event) {
-  const ngoName = event.ngoId?.name || (event.ngoId && typeof event.ngoId === 'object' ? event.ngoId.name : null);
+  const ngoName =
+    event.ngoId?.name || (event.ngoId && typeof event.ngoId === 'object' ? event.ngoId.name : null);
   return {
     ...event,
     id: event._id,
