@@ -1,4 +1,5 @@
 import multer from 'multer';
+import mongoose from 'mongoose';
 import { Event } from '../models/Event.model.js';
 import { Registration } from '../models/Registration.model.js';
 import { User } from '../models/User.model.js';
@@ -264,7 +265,7 @@ export const registerForEvent = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: 'Already registered' });
   }
 
-  const session = await Event.startSession();
+  const session = await mongoose.startSession();
   session.startTransaction();
   try {
     await Registration.create(
