@@ -7,7 +7,7 @@ export const getStats = asyncHandler(async (req, res) => {
 
   const regs = await Registration.find({
     volunteerId,
-    status: { $in: ['confirmed', 'attended'] },
+    status: { $in: ['pending', 'confirmed', 'attended'] },
   })
     .populate('eventId')
     .lean();
@@ -15,7 +15,10 @@ export const getStats = asyncHandler(async (req, res) => {
   const totalJoined = regs.length;
   const completed = regs.filter((r) => r.status === 'attended').length;
   const upcoming = regs.filter(
-    (r) => r.status === 'confirmed' && r.eventId && new Date(r.eventId.date) >= new Date()
+    (r) =>
+      ['pending', 'confirmed'].includes(r.status) &&
+      r.eventId &&
+      new Date(r.eventId.date) >= new Date()
   ).length;
 
   const statsData = {
@@ -53,7 +56,7 @@ export const getEvents = asyncHandler(async (req, res) => {
 
   const regs = await Registration.find({
     volunteerId,
-    status: { $in: ['confirmed', 'attended'] },
+    status: { $in: ['pending', 'confirmed', 'attended'] },
   })
     .populate({
       path: 'eventId',
