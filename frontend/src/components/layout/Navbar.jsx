@@ -99,13 +99,13 @@ export default function Navbar() {
                   to="/login"
                   className="px-4 py-2 text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-colors"
                 >
-                  Login
+                  Sign In
                 </Link>
                 <Link
                   to="/register"
                   className="px-6 py-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-medium rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
                 >
-                  Get Started
+                  Sign Up
                 </Link>
               </>
             )}
@@ -170,14 +170,14 @@ export default function Navbar() {
                     className="block w-full px-4 py-2 text-blue-600 font-medium border border-blue-600 rounded-lg text-center"
                     onClick={() => setIsOpen(false)}
                   >
-                    Login
+                    Sign In
                   </Link>
                   <Link
                     to="/register"
                     className="block w-full px-6 py-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-medium rounded-lg text-center"
                     onClick={() => setIsOpen(false)}
                   >
-                    Get Started
+                    Sign Up
                   </Link>
                 </>
               )}

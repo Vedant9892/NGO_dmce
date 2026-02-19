@@ -55,6 +55,22 @@ export default function LandingPage() {
                 Explore Opportunities
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
+              {!user && (
+                <>
+                  <Link
+                    to="/login"
+                    className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors inline-flex items-center justify-center"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="px-8 py-4 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-900 transition-colors inline-flex items-center justify-center"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
               {user?.role === 'ngo' && (
                 <Link
                   to="/create-event"
@@ -223,15 +239,29 @@ export default function LandingPage() {
               Ready to Make a Difference?
             </h2>
             <p className="text-xl text-gray-600 mb-8">
-              Join thousands of volunteers creating positive change in communities worldwide.
+              Join as a volunteer, coordinator, or NGO. Create your account and get started.
             </p>
-            <Link
-              to="/events"
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-xl transform hover:-translate-y-1 transition-all inline-flex items-center"
-            >
-              Start Volunteering Today
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/register"
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-xl transform hover:-translate-y-1 transition-all inline-flex items-center justify-center"
+              >
+                Sign Up
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+              <Link
+                to="/login"
+                className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors inline-flex items-center justify-center"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/events"
+                className="px-8 py-4 text-gray-600 font-semibold rounded-lg hover:text-gray-900 hover:bg-gray-100 transition-colors inline-flex items-center justify-center"
+              >
+                Browse Events
+              </Link>
+            </div>
           </div>
         </div>
       </section>
