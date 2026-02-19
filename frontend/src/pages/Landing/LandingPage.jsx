@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, QrCode, BarChart3, Award, Heart, ArrowRight } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 import { getPlatformStats } from '../../services/eventService';
 import Loader from '../../components/ui/Loader';
 
 export default function LandingPage() {
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -53,12 +55,14 @@ export default function LandingPage() {
                 Explore Opportunities
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
-              <Link
-                to="/create-event"
-                className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors inline-flex items-center justify-center"
-              >
-                Post an Event
-              </Link>
+              {user?.role === 'ngo' && (
+                <Link
+                  to="/create-event"
+                  className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors inline-flex items-center justify-center"
+                >
+                  Post an Event
+                </Link>
+              )}
             </div>
           </div>
 

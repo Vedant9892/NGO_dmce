@@ -41,7 +41,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/volunteer-dashboard" className="hover:text-blue-400 transition-colors">
+                <Link to="/dashboard/volunteer" className="hover:text-blue-400 transition-colors">
                   My Dashboard
                 </Link>
               </li>
@@ -62,7 +62,7 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4">For NGOs</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/ngo-dashboard" className="hover:text-blue-400 transition-colors">
+                <Link to="/dashboard/ngo" className="hover:text-blue-400 transition-colors">
                   NGO Portal
                 </Link>
               </li>

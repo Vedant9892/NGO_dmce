@@ -2,13 +2,24 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { getDashboardPath } from '../../utils/constants';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { token, logout } = useAuth();
+  const { user, token, logout } = useAuth();
 
   const isActive = (path) => location.pathname === path;
+  const role = user?.role;
+  const dashboardPath = role ? getDashboardPath(role) : '/login';
+
+  const roleBadgeClass = {
+    volunteer: 'bg-blue-100 text-blue-700',
+    coordinator: 'bg-purple-100 text-purple-700',
+    ngo: 'bg-green-100 text-green-700',
+  }[role] || 'bg-gray-100 text-gray-700';
+
+  const roleLabel = role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -40,39 +51,55 @@ export default function Navbar() {
             >
               Explore Events
             </Link>
-            <Link
-              to="/volunteer-dashboard"
-              className={`transition-colors ${
-                isActive('/volunteer-dashboard') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600'
-              }`}
-            >
-              Volunteer Dashboard
-            </Link>
-            <Link
-              to="/ngo-dashboard"
-              className={`transition-colors ${
-                isActive('/ngo-dashboard') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600'
-              }`}
-            >
-              NGO Portal
-            </Link>
+            {token && (
+              <Link
+                to={dashboardPath}
+                className={`transition-colors ${
+                  isActive(dashboardPath) ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600'
+                }`}
+              >
+                Dashboard
+              </Link>
+            )}
+            {token && role === 'ngo' && (
+              <Link
+                to="/create-event"
+                className={`transition-colors ${
+                  isActive('/create-event') ? 'text-blue-600 font-semibold' : 'text-gray-700 hover:text-blue-600'
+                }`}
+              >
+                Create Event
+              </Link>
+            )}
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
             {token ? (
-              <button
-                onClick={logout}
-                className="px-4 py-2 text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-colors"
-              >
-                Sign Out
-              </button>
+              <>
+                {roleLabel && (
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${roleBadgeClass}`}>
+                    {roleLabel}
+                  </span>
+                )}
+                {user?.name && (
+                  <span className="text-gray-600 text-sm truncate max-w-[120px]" title={user.name}>
+                    {user.name}
+                  </span>
+                )}
+                <button
+                  onClick={logout}
+                  className="px-4 py-2 text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  Logout
+                </button>
+              </>
             ) : (
               <>
                 <Link
                   to="/login"
                   className="px-4 py-2 text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-colors"
                 >
-                  Sign In
+                  Login
                 </Link>
                 <Link
                   to="/register"
@@ -110,27 +137,31 @@ export default function Navbar() {
             >
               Explore Events
             </Link>
-            <Link
-              to="/volunteer-dashboard"
-              className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-              onClick={() => setIsOpen(false)}
-            >
-              Volunteer Dashboard
-            </Link>
-            <Link
-              to="/ngo-dashboard"
-              className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-              onClick={() => setIsOpen(false)}
-            >
-              NGO Portal
-            </Link>
+            {token && (
+              <Link
+                to={dashboardPath}
+                className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
+                Dashboard
+              </Link>
+            )}
+            {token && role === 'ngo' && (
+              <Link
+                to="/create-event"
+                className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
+                Create Event
+              </Link>
+            )}
             <div className="pt-4 space-y-2">
               {token ? (
                 <button
                   onClick={() => { logout(); setIsOpen(false); }}
                   className="w-full px-4 py-2 text-blue-600 font-medium border border-blue-600 rounded-lg"
                 >
-                  Sign Out
+                  Logout
                 </button>
               ) : (
                 <>
@@ -139,7 +170,7 @@ export default function Navbar() {
                     className="block w-full px-4 py-2 text-blue-600 font-medium border border-blue-600 rounded-lg text-center"
                     onClick={() => setIsOpen(false)}
                   >
-                    Sign In
+                    Login
                   </Link>
                   <Link
                     to="/register"

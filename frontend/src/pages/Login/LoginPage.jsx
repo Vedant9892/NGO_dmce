@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getDashboardPath } from '../../utils/constants';
@@ -7,11 +7,17 @@ import Button from '../../components/ui/Button';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user, token } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (token && user) {
+      navigate(getDashboardPath(user.role || 'volunteer'), { replace: true });
+    }
+  }, [token, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

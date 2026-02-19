@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X, Plus } from 'lucide-react';
 import { createEvent } from '../../services/eventService';
 
 export default function CreateEventPage() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
   const [skills, setSkills] = useState([]);
   const [currentSkill, setCurrentSkill] = useState('');
+  const [bannerFile, setBannerFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -22,35 +25,64 @@ export default function CreateEventPage() {
     setSkills(skills.filter((s) => s !== skillToRemove));
   };
 
+  const handleBannerChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file (JPEG, PNG, or WebP)');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image must be under 5MB');
+        return;
+      }
+      setError(null);
+      setBannerFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setBannerFile(null);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
 
     const form = e.target;
-    const rolesText = form.querySelector('#roles')?.value || '';
-    const eligibilityText = form.querySelector('#eligibility')?.value || '';
-    const perksText = form.querySelector('#perks')?.value || '';
+    const eventDate = form.eventDate?.value;
+    const eventTime = form.eventTime?.value;
+    const dateISO = eventDate && eventTime
+      ? `${eventDate}T${eventTime}:00`
+      : eventDate || '';
 
-    const eventData = {
-      title: form.eventName?.value,
-      ngoName: form.ngoName?.value,
-      description: form.description?.value,
-      detailedDescription: form.detailedDescription?.value,
-      location: form.location?.value,
-      mode: form.mode?.value,
-      date: form.eventDate?.value,
-      registrationDeadline: form.registrationDeadline?.value,
-      volunteersRequired: parseInt(form.maxVolunteers?.value, 10),
-      contactEmail: form.contactEmail?.value,
-      skills,
-      roles: rolesText.split('\n').map((s) => s.trim()).filter(Boolean),
-      eligibility: eligibilityText.split('\n').map((s) => s.trim()).filter(Boolean),
-      perks: perksText.split('\n').map((s) => s.trim()).filter(Boolean),
-    };
+    if (!bannerFile) {
+      setError('Please upload an event banner image');
+      setSubmitting(false);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', form.eventName?.value || '');
+    formData.append('description', form.description?.value || '');
+    formData.append('detailedDescription', form.detailedDescription?.value || '');
+    formData.append('location', form.location?.value || '');
+    formData.append('mode', form.mode?.value || 'Offline');
+    formData.append('date', dateISO);
+    formData.append('registrationDeadline', form.registrationDeadline?.value || '');
+    formData.append('volunteersRequired', form.maxVolunteers?.value || '0');
+    formData.append('contactEmail', form.contactEmail?.value || '');
+    formData.append('skills', JSON.stringify(skills));
+    formData.append('roles', form.querySelector('#roles')?.value || '');
+    formData.append('eligibility', form.querySelector('#eligibility')?.value || '');
+    formData.append('perks', form.querySelector('#perks')?.value || '');
+    formData.append('bannerImage', bannerFile);
 
     try {
-      await createEvent(eventData);
+      await createEvent(formData);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
       navigate('/ngo-dashboard');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to create event');
@@ -134,14 +166,51 @@ export default function CreateEventPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Event Banner <span className="text-red-500">*</span>
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer">
-                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
-                <p className="text-sm text-gray-500">
-                  PNG, JPG up to 10MB (Recommended: 1200x600px)
-                </p>
-                <input type="file" className="hidden" accept="image/*" />
-              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleBannerChange}
+              />
+              {previewUrl ? (
+                <div className="relative rounded-lg overflow-hidden border-2 border-gray-200">
+                  <img
+                    src={previewUrl}
+                    alt="Banner preview"
+                    className="w-full h-48 object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBannerFile(null);
+                      URL.revokeObjectURL(previewUrl);
+                      setPreviewUrl(null);
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <p className="absolute bottom-2 left-2 text-sm text-white bg-black/60 px-2 py-1 rounded">
+                    {bannerFile?.name}
+                  </p>
+                </div>
+              ) : (
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(ev) => ev.key === 'Enter' && fileInputRef.current?.click()}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer"
+                >
+                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
+                  <p className="text-sm text-gray-500">
+                    PNG, JPG, WebP up to 5MB (Recommended: 1200x600px)
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

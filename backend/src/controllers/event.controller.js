@@ -22,18 +22,18 @@ export const upload = multer({
 
 export const uploadBannerToSupabase = async (file) => {
   if (!file || !file.buffer) return null;
-  const ext = file.originalname.split('.').pop();
-  const name = `events/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const ext = (file.originalname.split('.').pop() || 'jpg').toLowerCase();
+  const uniqueName = `${Date.now()}.${ext}`;
 
   const { data, error } = await supabase.storage
     .from('events')
-    .upload(name, file.buffer, {
+    .upload(uniqueName, file.buffer, {
       contentType: file.mimetype,
       upsert: false,
     });
 
   if (error) {
-    throw new Error('Image upload failed');
+    throw new Error(error.message || 'Image upload failed');
   }
 
   const { data: urlData } = supabase.storage.from('events').getPublicUrl(data.path);
@@ -48,6 +48,19 @@ const validateCoordinatorId = async (coordinatorId) => {
   }
   return coordinatorId;
 };
+
+function parseArrayField(val) {
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [parsed];
+    } catch {
+      return val.split(/\n|,/).map((s) => s.trim()).filter(Boolean);
+    }
+  }
+  return val ? [val] : [];
+}
 
 export const createEvent = asyncHandler(async (req, res) => {
   const {
@@ -79,7 +92,14 @@ export const createEvent = asyncHandler(async (req, res) => {
 
   let bannerImage = null;
   if (req.file) {
-    bannerImage = await uploadBannerToSupabase(req.file);
+    try {
+      bannerImage = await uploadBannerToSupabase(req.file);
+    } catch (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message || 'Failed to upload image',
+      });
+    }
   }
 
   const event = await Event.create({
@@ -93,12 +113,12 @@ export const createEvent = asyncHandler(async (req, res) => {
     date: date ? new Date(date) : undefined,
     registrationDeadline: registrationDeadline ? new Date(registrationDeadline) : undefined,
     bannerImage,
-    skills: Array.isArray(skills) ? skills : skills ? [skills] : [],
+    skills: parseArrayField(skills),
     volunteersRequired: parseInt(volunteersRequired, 10) || 0,
-    roles: Array.isArray(roles) ? roles : roles ? [roles] : [],
-    eligibility: Array.isArray(eligibility) ? eligibility : eligibility ? [eligibility] : [],
-    timeline: Array.isArray(timeline) ? timeline : [],
-    perks: Array.isArray(perks) ? perks : perks ? [perks] : [],
+    roles: parseArrayField(roles),
+    eligibility: parseArrayField(eligibility),
+    timeline: Array.isArray(timeline) ? timeline : typeof timeline === 'string' ? (() => { try { const t = JSON.parse(timeline); return Array.isArray(t) ? t : []; } catch { return []; } })() : [],
+    perks: parseArrayField(perks),
     contactEmail,
   });
 

@@ -11,8 +11,8 @@ export const getEventById = async (id) => {
   return data?.data ?? data;
 };
 
-export const createEvent = async (eventData) => {
-  const { data } = await api.post('/events', eventData);
+export const createEvent = async (dataOrFormData) => {
+  const { data } = await api.post('/events', dataOrFormData);
   return data;
 };
 

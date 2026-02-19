@@ -1,18 +1,25 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { MapPin, Calendar, Users, Mail, Share2, Bookmark, Clock, CheckCircle, Award, ArrowLeft } from 'lucide-react';
-import { getEventById, registerForEvent } from '../../services/eventService';
+import { MapPin, Calendar, Users, Mail, Share2, Bookmark, Clock, CheckCircle, Award, ArrowLeft, UserCheck } from 'lucide-react';
+import { getEventById, registerForEvent, getCoordinatorEventVolunteers, markAttendance } from '../../services/eventService';
 import { useAuth } from '../../hooks/useAuth';
 import Loader from '../../components/ui/Loader';
 
 export default function EventDetailsPage() {
   const { id } = useParams();
-  const { token } = useAuth();
+  const [searchParams] = useSearchParams();
+  const showAttendance = searchParams.get('markAttendance') === 'true';
+  const { user, token } = useAuth();
+  const isVolunteer = user?.role === 'volunteer';
+  const isCoordinator = user?.role === 'coordinator';
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [registering, setRegistering] = useState(false);
   const [registered, setRegistered] = useState(false);
+  const [volunteers, setVolunteers] = useState([]);
+  const [selectedVolunteers, setSelectedVolunteers] = useState([]);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -34,6 +41,37 @@ export default function EventDetailsPage() {
       });
     return () => { cancelled = true; };
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !isCoordinator || !showAttendance) return;
+    getCoordinatorEventVolunteers(id)
+      .then(setVolunteers)
+      .catch(() => setVolunteers([]));
+  }, [id, isCoordinator, showAttendance]);
+
+  const handleMarkAttendance = async () => {
+    if (!event?.id || selectedVolunteers.length === 0 || attendanceLoading) return;
+    setAttendanceLoading(true);
+    try {
+      await markAttendance(event.id, selectedVolunteers);
+      setSelectedVolunteers([]);
+      setVolunteers((prev) =>
+        prev.map((v) =>
+          selectedVolunteers.includes(v.volunteerId) ? { ...v, status: 'attended' } : v
+        )
+      );
+    } finally {
+      setAttendanceLoading(false);
+    }
+  };
+
+  const toggleVolunteer = (volunteerId) => {
+    setSelectedVolunteers((prev) =>
+      prev.includes(volunteerId)
+        ? prev.filter((id) => id !== volunteerId)
+        : [...prev, volunteerId]
+    );
+  };
 
   const handleRegister = async () => {
     if (!token) {
@@ -237,13 +275,69 @@ export default function EventDetailsPage() {
                 </div>
               </div>
 
-              <button
-                onClick={handleRegister}
-                disabled={registering || spotsLeft <= 0 || registered}
-                className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {registered ? 'Registered' : registering ? 'Registering...' : spotsLeft <= 0 ? 'Event Full' : 'Register Now'}
-              </button>
+              {isVolunteer && (
+                <button
+                  onClick={handleRegister}
+                  disabled={registering || spotsLeft <= 0 || registered}
+                  className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {registered ? 'Registered' : registering ? 'Registering...' : spotsLeft <= 0 ? 'Event Full' : 'Register Now'}
+                </button>
+              )}
+              {!token && (
+                <Link
+                  to="/login"
+                  className="block w-full text-center bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3"
+                >
+                  Login to Register
+                </Link>
+              )}
+
+              {isCoordinator && showAttendance && volunteers.length > 0 && (
+                <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <UserCheck className="h-5 w-5 mr-2 text-green-600" />
+                    Mark Attendance
+                  </h3>
+                  <div className="space-y-2 max-h-40 overflow-y-auto mb-3">
+                    {volunteers
+                      .filter((v) => v.status !== 'attended')
+                      .map((v) => (
+                        <label
+                          key={v.id}
+                          className="flex items-center gap-2 cursor-pointer text-sm"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedVolunteers.includes(v.volunteerId)}
+                            onChange={() => toggleVolunteer(v.volunteerId)}
+                            className="rounded"
+                          />
+                          <span>{v.name || v.email || 'Volunteer'}</span>
+                          {v.status === 'attended' && (
+                            <span className="text-green-600 text-xs">✓ Attended</span>
+                          )}
+                        </label>
+                      ))}
+                  </div>
+                  <button
+                    onClick={handleMarkAttendance}
+                    disabled={selectedVolunteers.length === 0 || attendanceLoading}
+                    className="w-full px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {attendanceLoading ? 'Marking...' : `Mark ${selectedVolunteers.length} Attended`}
+                  </button>
+                </div>
+              )}
+
+              {isCoordinator && !showAttendance && (
+                <Link
+                  to={`/events/${id}?markAttendance=true`}
+                  className="block w-full text-center px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 mb-3"
+                >
+                  Mark Attendance
+                </Link>
+              )}
 
               <div className="grid grid-cols-2 gap-3 mb-6">
                 <button className="flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
