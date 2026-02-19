@@ -64,9 +64,13 @@ const seed = async () => {
       volunteers.map((v) => ({
         volunteerId: v._id,
         eventId: event1._id,
-        status: 'confirmed',
+        status: 'pending',
       }))
     );
+
+    await Event.findByIdAndUpdate(event1._id, {
+      registeredVolunteers: volunteers.map((v) => v._id),
+    });
 
     console.log('Database seeded successfully');
     process.exit(0);

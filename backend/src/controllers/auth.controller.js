@@ -19,6 +19,13 @@ export const register = asyncHandler(async (req, res) => {
     });
   }
 
+  if (['ngo', 'coordinator'].includes(role) && !organization?.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Organization is required for NGO and coordinator roles',
+    });
+  }
+
   const exists = await User.findOne({ email: email.toLowerCase() });
   if (exists) {
     return res.status(400).json({
