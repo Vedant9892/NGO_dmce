@@ -121,14 +121,14 @@ export default function VolunteerDashboard() {
           <EventsTab
             registeredEvents={registeredEvents}
             completedEvents={completedEvents}
-            onRefresh={() => {
+            onRefresh={() =>
               getVolunteerEvents().then((data) => {
                 const reg = data?.registered ?? [];
                 const comp = data?.completed ?? [];
                 setRegisteredEvents(Array.isArray(reg) ? reg : []);
                 setCompletedEvents(Array.isArray(comp) ? comp : []);
-              });
-            }}
+              })
+            }
           />
         )}
         {activeTab === 'certificates' && <CertificatesTab certificates={certificates} />}
@@ -219,8 +219,31 @@ function DashboardTab({ stats, registeredEvents }) {
   );
 }
 
-function EventsTab({ registeredEvents, completedEvents }) {
+function EventsTab({ registeredEvents, completedEvents, onRefresh }) {
   const [eventTab, setEventTab] = useState('registered');
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+
+  const handleAcceptOffer = async (registrationId) => {
+    if (actionLoadingId) return;
+    setActionLoadingId(registrationId);
+    try {
+      await acceptOffer(registrationId);
+      onRefresh?.();
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleDeclineOffer = async (registrationId) => {
+    if (actionLoadingId) return;
+    setActionLoadingId(registrationId);
+    try {
+      await declineOffer(registrationId);
+      onRefresh?.();
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
 
   return (
     <div>
@@ -250,42 +273,80 @@ function EventsTab({ registeredEvents, completedEvents }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {eventTab === 'registered' &&
           (registeredEvents.length > 0 ? (
-            registeredEvents.map((event) => (
-              <div
-                key={event.id}
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
-              >
-                <img
-                  src={event.bannerImage || 'https://placehold.co/600x240?text=Event'}
-                  alt={event.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <div className="text-sm text-blue-600 font-semibold mb-2">{event.ngoName || 'NGO'}</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
-                  <div className="flex items-center text-sm text-gray-600 mb-2">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {event.date
-                      ? new Date(event.date).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })
-                      : 'TBD'}
+            registeredEvents.map((event) => {
+              const status = event.registrationStatus || event.status;
+              const regId = event.registrationId;
+              const isRoleOffered = status === 'role_offered';
+              const isApprovedOrConfirmed = ['approved', 'confirmed'].includes(status);
+              const confirmedRole = event.offeredRole || event.appliedRole;
+              const acting = actionLoadingId === regId;
+              return (
+                <div
+                  key={event.id}
+                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+                >
+                  <img
+                    src={event.bannerImage || 'https://placehold.co/600x240?text=Event'}
+                    alt={event.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm text-blue-600 font-semibold">{event.ngoName || 'NGO'}</div>
+                      {isApprovedOrConfirmed && confirmedRole && (
+                        <span className="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
+                          Role: {confirmedRole}
+                        </span>
+                      )}
+                      {isRoleOffered && (
+                        <span className="px-2 py-1 text-xs font-semibold bg-purple-100 text-purple-800 rounded-full">
+                          Role Offered
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
+                    <div className="flex items-center text-sm text-gray-600 mb-2">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {event.date
+                        ? new Date(event.date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })
+                        : 'TBD'}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600 mb-4">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      {event.location || 'TBD'}
+                    </div>
+                    {isRoleOffered && regId && (
+                      <div className="flex gap-2 mb-4">
+                        <button
+                          onClick={() => handleAcceptOffer(regId)}
+                          disabled={acting}
+                          className="flex-1 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50"
+                        >
+                          {acting ? '...' : 'Accept Role'}
+                        </button>
+                        <button
+                          onClick={() => handleDeclineOffer(regId)}
+                          disabled={acting}
+                          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          Decline Role
+                        </button>
+                      </div>
+                    )}
+                    <Link
+                      to={`/events/${event.id ?? event._id}`}
+                      className="block w-full text-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      View Details
+                    </Link>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600 mb-4">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    {event.location || 'TBD'}
-                  </div>
-                  <Link
-                    to={`/events/${event.id ?? event._id}`}
-                    className="block w-full text-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    View Details
-                  </Link>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="col-span-2 text-center py-12 bg-white rounded-xl text-gray-500">
               No registered events yet. <Link to="/events" className="text-blue-600 hover:underline">Browse events</Link>
