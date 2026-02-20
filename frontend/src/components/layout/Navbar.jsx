@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Heart } from 'lucide-react';
+import NotificationDropdown from './NotificationDropdown';
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { getDashboardPath } from '../../utils/constants';
@@ -76,6 +77,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {token ? (
               <>
+                <NotificationDropdown />
                 {roleLabel && (
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${roleBadgeClass}`}>
                     {roleLabel}
