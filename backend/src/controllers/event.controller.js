@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { Event } from '../models/Event.model.js';
 import { Registration } from '../models/Registration.model.js';
 import { User } from '../models/User.model.js';
+import { createNotification } from '../modules/notifications/notification.service.js';
 import { supabase } from '../config/supabase.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
@@ -386,11 +387,13 @@ export const registerForEvent = asyncHandler(async (req, res) => {
 
   const session = await mongoose.startSession();
   session.startTransaction();
+  let createdReg;
   try {
-    await Registration.create(
+    const [reg] = await Registration.create(
       [{ eventId: event._id, volunteerId: req.user._id, appliedRole: usesEventRoles ? appliedRole : undefined, status: 'pending' }],
       { session }
     );
+    createdReg = reg;
     await Event.findByIdAndUpdate(
       event._id,
       { $addToSet: { registeredVolunteers: req.user._id } },
@@ -403,6 +406,22 @@ export const registerForEvent = asyncHandler(async (req, res) => {
     throw err;
   } finally {
     session.endSession();
+  }
+
+  try {
+    const recipient = event.coordinatorId || event.ngoId;
+    if (recipient) {
+      await createNotification({
+        recipient,
+        type: 'registration_apply',
+        title: 'New registration',
+        message: `${req.user.name} applied for "${event.title}".`,
+        relatedEvent: event._id,
+        relatedRegistration: createdReg._id,
+      });
+    }
+  } catch {
+    // Don't fail the response if notification fails
   }
 
   res.status(201).json({
@@ -446,6 +465,20 @@ export const markAttendance = asyncHandler(async (req, res) => {
     },
     { status: 'attended', attendedAt: new Date() }
   );
+
+  try {
+    for (const volunteerId of volunteerIds) {
+      await createNotification({
+        recipient: volunteerId,
+        type: 'attendance_marked',
+        title: 'Attendance marked',
+        message: `Your attendance has been marked for "${event.title}".`,
+        relatedEvent: event._id,
+      });
+    }
+  } catch {
+    // Don't fail the response if notification fails
+  }
 
   res.json({
     success: true,
