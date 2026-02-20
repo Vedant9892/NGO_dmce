@@ -31,16 +31,41 @@ async function assertCoordinatorForEvent(coordinatorId, eventId, res) {
   return event;
 }
 
+function formatNotificationForDisplay(n) {
+  const base = {
+    id: n._id,
+    type: n.type,
+    title: n.title,
+    message: n.message,
+    isRead: n.isRead,
+    createdAt: n.createdAt,
+  };
+
+  const senderName = n.sender?.name ?? null;
+  const eventTitle = n.eventId?.title ?? null;
+
+  switch (n.type) {
+    case 'DIRECT_MESSAGE':
+      return { ...base, senderName };
+    case 'EVENT_BROADCAST':
+      return { ...base, eventTitle };
+    case 'EMERGENCY_ALERT':
+      return { ...base, senderName, eventTitle, emergency: true };
+    default:
+      return { ...base, senderName, eventTitle };
+  }
+}
+
 export const getNotifications = asyncHandler(async (req, res) => {
   const notifications = await Notification.find({ recipient: req.user._id })
     .sort({ createdAt: -1 })
     .populate('sender', 'name')
-    .populate('eventId', 'title date')
+    .populate('eventId', 'title')
     .lean();
 
   res.json({
     success: true,
-    data: notifications.map((n) => ({ ...n, id: n._id })),
+    data: notifications.map(formatNotificationForDisplay),
   });
 });
 
