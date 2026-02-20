@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import { Event } from '../models/Event.model.js';
 import { Registration } from '../models/Registration.model.js';
-import { createNotification } from '../modules/notifications/notification.service.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 function isValidObjectId(id) {
@@ -85,20 +84,6 @@ export const approveRegistration = asyncHandler(async (req, res) => {
   }
 
   const updated = await Registration.findById(id).populate('volunteerId', 'name email').lean();
-
-  try {
-    await createNotification({
-      recipient: reg.volunteerId,
-      type: 'registration_approved',
-      title: 'Registration approved',
-      message: `Your registration for "${event.title}" has been approved.`,
-      relatedEvent: event._id,
-      relatedRegistration: reg._id,
-    });
-  } catch {
-    // Don't fail the response if notification fails
-  }
-
   res.json({ success: true, data: { ...updated, id: updated._id } });
 });
 
@@ -132,20 +117,6 @@ export const rejectRegistration = asyncHandler(async (req, res) => {
 
   await Registration.findByIdAndUpdate(id, { status: 'rejected' });
   const updated = await Registration.findById(id).populate('volunteerId', 'name email').lean();
-
-  try {
-    await createNotification({
-      recipient: reg.volunteerId,
-      type: 'registration_rejected',
-      title: 'Registration rejected',
-      message: `Your registration for "${event.title}" has been rejected.`,
-      relatedEvent: event._id,
-      relatedRegistration: reg._id,
-    });
-  } catch {
-    // Don't fail the response if notification fails
-  }
-
   res.json({ success: true, data: { ...updated, id: updated._id } });
 });
 
@@ -194,20 +165,6 @@ export const offerRole = asyncHandler(async (req, res) => {
 
   await Registration.findByIdAndUpdate(id, { status: 'role_offered', offeredRole });
   const updated = await Registration.findById(id).populate('volunteerId', 'name email').lean();
-
-  try {
-    await createNotification({
-      recipient: reg.volunteerId,
-      type: 'role_offered',
-      title: 'Role offered',
-      message: `You have been offered the role "${offeredRole}" for "${event.title}". Please accept or decline.`,
-      relatedEvent: event._id,
-      relatedRegistration: reg._id,
-    });
-  } catch {
-    // Don't fail the response if notification fails
-  }
-
   res.json({ success: true, data: { ...updated, id: updated._id } });
 });
 
@@ -268,22 +225,6 @@ export const acceptOffer = asyncHandler(async (req, res) => {
   }
 
   const updated = await Registration.findById(id).populate('volunteerId', 'name email').lean();
-
-  try {
-    if (event.coordinatorId) {
-      await createNotification({
-        recipient: event.coordinatorId,
-        type: 'offer_accepted',
-        title: 'Offer accepted',
-        message: `${req.user.name} accepted the role for "${event.title}".`,
-        relatedEvent: event._id,
-        relatedRegistration: reg._id,
-      });
-    }
-  } catch {
-    // Don't fail the response if notification fails
-  }
-
   res.json({ success: true, data: { ...updated, id: updated._id } });
 });
 
@@ -310,28 +251,7 @@ export const declineOffer = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: 'No offer to decline' });
   }
 
-  const event = await Event.findById(reg.eventId);
-  if (!event) {
-    return res.status(404).json({ success: false, message: 'Event not found' });
-  }
-
   await Registration.findByIdAndUpdate(id, { status: 'declined' });
   const updated = await Registration.findById(id).populate('volunteerId', 'name email').lean();
-
-  try {
-    if (event.coordinatorId) {
-      await createNotification({
-        recipient: event.coordinatorId,
-        type: 'offer_declined',
-        title: 'Offer declined',
-        message: `${req.user.name} declined the role for "${event.title}".`,
-        relatedEvent: event._id,
-        relatedRegistration: reg._id,
-      });
-    }
-  } catch {
-    // Don't fail the response if notification fails
-  }
-
   res.json({ success: true, data: { ...updated, id: updated._id } });
 });

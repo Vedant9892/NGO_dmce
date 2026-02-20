@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getNotifications, markNotificationAsRead } from '../services/notificationService';
 
-const POLL_INTERVAL_MS = 30 * 1000;
+const POLL_INTERVAL_MS = 20 * 1000;
 
 export function useNotifications(enabled = true) {
   const [notifications, setNotifications] = useState([]);

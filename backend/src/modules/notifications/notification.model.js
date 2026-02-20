@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+const NOTIFICATION_TYPES = ['DIRECT_MESSAGE', 'EVENT_BROADCAST', 'EMERGENCY_ALERT'];
+
 const notificationSchema = new mongoose.Schema(
   {
     recipient: {
@@ -7,8 +9,19 @@ const notificationSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    eventId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Event',
+      required: true,
+    },
     type: {
       type: String,
+      enum: NOTIFICATION_TYPES,
       required: true,
     },
     title: {
@@ -18,14 +31,6 @@ const notificationSchema = new mongoose.Schema(
     message: {
       type: String,
       required: true,
-    },
-    relatedEvent: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Event',
-    },
-    relatedRegistration: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Registration',
     },
     isRead: {
       type: Boolean,
@@ -38,3 +43,4 @@ const notificationSchema = new mongoose.Schema(
 notificationSchema.index({ recipient: 1, createdAt: -1 });
 
 export const Notification = mongoose.model('Notification', notificationSchema);
+export { NOTIFICATION_TYPES };
