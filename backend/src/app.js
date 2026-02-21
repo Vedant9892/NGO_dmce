@@ -9,6 +9,7 @@ import coordinatorRoutes from './routes/coordinator.routes.js';
 import statsRoutes from './routes/stats.routes.js';
 import registrationRoutes from './routes/registration.routes.js';
 import notificationRoutes from './modules/notifications/notification.routes.js';
+import chatbotRoutes from './modules/chatbot/chatbot.routes.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api/coordinator', coordinatorRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 app.use(errorHandler);
 
