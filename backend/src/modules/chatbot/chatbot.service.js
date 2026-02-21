@@ -182,16 +182,15 @@ function fallbackAnswer(retrieved, query) {
  */
 export async function getChatbotAnswer(question, userRole = 'guest') {
   const retrieved = retrieveChunks(question, userRole, 4);
-  const sources = retrieved.map((c) => c.title);
 
   try {
     const systemPrompt = buildSystemPrompt(userRole, retrieved);
     const answer = await callGroq(systemPrompt, question);
-    return { answer, sources };
+    return { answer };
   } catch (err) {
     // Graceful fallback: return best matching chunk content directly
     console.warn('[Chatbot] LLM call failed, using fallback:', err.message);
     const answer = fallbackAnswer(retrieved, question);
-    return { answer, sources, fallback: true };
+    return { answer, fallback: true };
   }
 }

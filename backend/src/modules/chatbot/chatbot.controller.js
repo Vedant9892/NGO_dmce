@@ -27,13 +27,12 @@ export const handleChatMessage = async (req, res) => {
     userRole = roleMap[req.user.role?.toLowerCase()] ?? 'volunteer';
   }
 
-  const { answer, sources, fallback } = await getChatbotAnswer(question.trim(), userRole);
+  const { answer, fallback } = await getChatbotAnswer(question.trim(), userRole);
 
   return res.json({
     success: true,
     role: userRole,
     answer,
-    sources,
     ...(fallback ? { notice: 'AI service unavailable — showing best matching content.' } : {}),
   });
 };
