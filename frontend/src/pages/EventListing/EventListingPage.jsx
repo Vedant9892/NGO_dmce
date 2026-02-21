@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, MapPin, Calendar, Users, TrendingUp, ChevronDown } from 'lucide-react';
 import { getEvents } from '../../services/eventService';
@@ -32,7 +32,7 @@ function EventCard({ event }) {
       </div>
 
       <div className="p-6">
-        <div className="text-sm text-blue-600 font-semibold mb-2">{event.ngoName || 'NGO'}</div>
+        <div className="text-sm text-emerald-700 font-semibold mb-2">{event.ngoName || 'NGO'}</div>
         <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{event.title}</h3>
         <p className="text-gray-600 text-sm mb-4 line-clamp-2">{event.description || ''}</p>
 
@@ -59,7 +59,7 @@ function EventCard({ event }) {
             {skills.slice(0, 3).map((skill, index) => (
               <span
                 key={index}
-                className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full"
+                className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full"
               >
                 {skill}
               </span>
@@ -74,7 +74,7 @@ function EventCard({ event }) {
 
         <Link
           to={`/events/${event.id ?? event._id}`}
-          className="block w-full text-center px-4 py-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
+          className="block w-full text-center px-4 py-2 bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
         >
           View Details
         </Link>
@@ -146,7 +146,7 @@ export default function EventListingPage() {
           <p className="text-red-600 text-lg mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800"
           >
             Retry
           </button>
@@ -172,7 +172,7 @@ export default function EventListingPage() {
                 placeholder="Search events..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -180,7 +180,7 @@ export default function EventListingPage() {
                 <select
                   value={locationFilter}
                   onChange={(e) => setLocationFilter(e.target.value)}
-                  className="appearance-none pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
+                  className="appearance-none pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white cursor-pointer"
                 >
                   <option value="all">All Locations</option>
                   <option value="Mumbai">Mumbai</option>
@@ -196,7 +196,7 @@ export default function EventListingPage() {
                 <select
                   value={skillFilter}
                   onChange={(e) => setSkillFilter(e.target.value)}
-                  className="appearance-none pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
+                  className="appearance-none pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white cursor-pointer"
                 >
                   <option value="all">All Skills</option>
                   <option value="Teaching">Teaching</option>
@@ -211,7 +211,7 @@ export default function EventListingPage() {
                 <select
                   value={modeFilter}
                   onChange={(e) => setModeFilter(e.target.value)}
-                  className="appearance-none pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
+                  className="appearance-none pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white cursor-pointer"
                 >
                   <option value="all">All Modes</option>
                   <option value="Online">Online</option>
@@ -260,3 +260,4 @@ export default function EventListingPage() {
     </div>
   );
 }
+

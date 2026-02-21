@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X, Plus } from 'lucide-react';
 import { createEvent, getNGOCoordinators } from '../../services/eventService';
@@ -122,7 +122,7 @@ export default function CreateEventPage() {
                 name="eventName"
                 required
                 placeholder="e.g., Beach Cleanup Drive"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
@@ -136,7 +136,7 @@ export default function CreateEventPage() {
                 name="ngoName"
                 required
                 placeholder="Your organization name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
@@ -151,7 +151,7 @@ export default function CreateEventPage() {
                 rows={2}
                 placeholder="Brief description for event cards (max 120 characters)"
                 maxLength={120}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
@@ -165,7 +165,7 @@ export default function CreateEventPage() {
                 required
                 rows={6}
                 placeholder="Provide a comprehensive description of the event, its goals, and what volunteers will do..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
@@ -209,7 +209,7 @@ export default function CreateEventPage() {
                   tabIndex={0}
                   onKeyDown={(ev) => ev.key === 'Enter' && fileInputRef.current?.click()}
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer"
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-emerald-600 transition-colors cursor-pointer"
                 >
                   <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
@@ -231,7 +231,7 @@ export default function CreateEventPage() {
                   name="location"
                   required
                   placeholder="e.g., Marina Beach, Chennai"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -242,7 +242,7 @@ export default function CreateEventPage() {
                   id="mode"
                   name="mode"
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
                 >
                   <option value="">Select mode</option>
                   <option value="Offline">Offline</option>
@@ -262,7 +262,7 @@ export default function CreateEventPage() {
                   id="eventDate"
                   name="eventDate"
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -274,7 +274,7 @@ export default function CreateEventPage() {
                   id="eventTime"
                   name="eventTime"
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -290,12 +290,12 @@ export default function CreateEventPage() {
                   onChange={(e) => setCurrentSkill(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())}
                   placeholder="Type a skill and press Add"
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={handleAddSkill}
-                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                  className="px-6 py-3 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors flex items-center"
                 >
                   <Plus className="h-5 w-5 mr-1" />
                   Add
@@ -306,13 +306,13 @@ export default function CreateEventPage() {
                   {skills.map((skill) => (
                     <span
                       key={skill}
-                      className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg flex items-center"
+                      className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg flex items-center"
                     >
                       {skill}
                       <button
                         type="button"
                         onClick={() => handleRemoveSkill(skill)}
-                        className="ml-2 text-blue-700 hover:text-blue-900"
+                        className="ml-2 text-emerald-700 hover:text-emerald-900"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -329,7 +329,7 @@ export default function CreateEventPage() {
               <select
                 id="coordinatorId"
                 name="coordinatorId"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
               >
                 <option value="">None</option>
                 {coordinators.map((c) => (
@@ -357,7 +357,7 @@ export default function CreateEventPage() {
                   required
                   min="1"
                   placeholder="e.g., 50"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
               </div>
               <div>
@@ -369,7 +369,7 @@ export default function CreateEventPage() {
                   id="registrationDeadline"
                   name="registrationDeadline"
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -383,7 +383,7 @@ export default function CreateEventPage() {
                 name="roles"
                 rows={4}
                 placeholder="List the different roles and their responsibilities (one per line)"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
@@ -396,7 +396,7 @@ export default function CreateEventPage() {
                 name="eligibility"
                 rows={3}
                 placeholder="Specify eligibility requirements (one per line)"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
@@ -409,7 +409,7 @@ export default function CreateEventPage() {
                 name="perks"
                 rows={3}
                 placeholder="List perks and benefits for volunteers (one per line)"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
@@ -423,7 +423,7 @@ export default function CreateEventPage() {
                 name="contactEmail"
                 required
                 placeholder="contact@yourorganization.org"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
@@ -438,14 +438,14 @@ export default function CreateEventPage() {
                 </button>
                 <button
                   type="button"
-                  className="px-8 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+                  className="px-8 py-3 border-2 border-emerald-700 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors"
                 >
                   Save as Draft
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-50"
+                  className="px-8 py-3 bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-50"
                 >
                   {submitting ? 'Publishing...' : 'Publish Event'}
                 </button>
@@ -457,3 +457,4 @@ export default function CreateEventPage() {
     </div>
   );
 }
+

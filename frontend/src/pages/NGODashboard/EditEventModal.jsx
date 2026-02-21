@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { X, Plus } from 'lucide-react';
 import { updateEvent } from '../../services/eventService';
 
@@ -116,7 +116,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                 type="text"
                 value={form.title}
                 onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                 required
               />
             </div>
@@ -126,7 +126,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                 value={form.description}
                 onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -135,7 +135,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                 value={form.detailedDescription}
                 onChange={(e) => setForm((p) => ({ ...p, detailedDescription: e.target.value }))}
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -145,7 +145,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                   type="text"
                   value={form.location}
                   onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
@@ -153,7 +153,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                 <select
                   value={form.mode}
                   onChange={(e) => setForm((p) => ({ ...p, mode: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white"
                 >
                   <option value="Offline">Offline</option>
                   <option value="Online">Online</option>
@@ -168,7 +168,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                   type="date"
                   value={form.date}
                   onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
@@ -177,7 +177,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                   type="date"
                   value={form.registrationDeadline}
                   onChange={(e) => setForm((p) => ({ ...p, registrationDeadline: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                   min="0"
                   value={form.volunteersRequired}
                   onChange={(e) => setForm((p) => ({ ...p, volunteersRequired: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
@@ -198,7 +198,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                   type="email"
                   value={form.contactEmail}
                   onChange={(e) => setForm((p) => ({ ...p, contactEmail: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -207,7 +207,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
               <select
                 value={form.coordinatorId}
                 onChange={(e) => setForm((p) => ({ ...p, coordinatorId: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white"
               >
                 <option value="">None</option>
                 {coordinators.map((c) => (
@@ -226,9 +226,9 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                   onChange={(e) => setCurrentSkill(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())}
                   placeholder="Add skill"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                 />
-                <button type="button" onClick={handleAddSkill} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                <button type="button" onClick={handleAddSkill} className="px-4 py-2 bg-emerald-700 text-white rounded-lg">
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
@@ -236,7 +236,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                 {form.skills.map((s) => (
                   <span
                     key={s}
-                    className="px-2 py-1 bg-blue-100 text-blue-700 rounded flex items-center gap-1"
+                    className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded flex items-center gap-1"
                   >
                     {s}
                     <button type="button" onClick={() => handleRemoveSkill(s)} className="hover:text-red-600">
@@ -252,7 +252,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                 value={form.roles}
                 onChange={(e) => setForm((p) => ({ ...p, roles: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -261,7 +261,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                 value={form.eligibility}
                 onChange={(e) => setForm((p) => ({ ...p, eligibility: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -270,7 +270,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
                 value={form.perks}
                 onChange={(e) => setForm((p) => ({ ...p, perks: e.target.value }))}
                 rows={2}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div className="flex gap-3 justify-end pt-4 border-t">
@@ -284,7 +284,7 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-lg disabled:opacity-50"
+                className="px-6 py-2 bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold rounded-lg hover:shadow-lg disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -295,3 +295,4 @@ export default function EditEventModal({ event, coordinators = [], onClose, onSu
     </div>
   );
 }
+

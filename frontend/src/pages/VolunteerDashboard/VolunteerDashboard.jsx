@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, Award, TrendingUp, MapPin, Download } from 'lucide-react';
 import {
@@ -67,7 +67,7 @@ export default function VolunteerDashboard() {
           <p className="text-red-600 text-lg mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800"
           >
             Retry
           </button>
@@ -85,10 +85,10 @@ export default function VolunteerDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-blue-600 to-green-500 text-white py-8 px-4 sm:px-6 lg:px-8">
+      <div className="bg-gradient-to-r from-emerald-700 to-emerald-500 text-white py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold mb-2">Volunteer Dashboard</h1>
-          <p className="text-blue-100">Track your impact and manage your volunteering journey</p>
+          <p className="text-emerald-100">Track your impact and manage your volunteering journey</p>
         </div>
       </div>
 
@@ -101,7 +101,7 @@ export default function VolunteerDashboard() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-6 py-4 font-semibold transition-colors capitalize ${
                   activeTab === tab
-                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    ? 'text-emerald-700 border-b-2 border-emerald-700'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -142,18 +142,18 @@ function DashboardTab({ stats, registeredEvents }) {
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-emerald-600">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-600">Total Events</span>
-            <Calendar className="h-6 w-6 text-blue-500" />
+            <Calendar className="h-6 w-6 text-emerald-600" />
           </div>
           <div className="text-3xl font-bold text-gray-900">{stats.totalEvents}</div>
           <div className="text-sm text-gray-500 mt-1">Joined events</div>
         </div>
-        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-emerald-500">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-600">Hours Volunteered</span>
-            <Clock className="h-6 w-6 text-green-500" />
+            <Clock className="h-6 w-6 text-emerald-600" />
           </div>
           <div className="text-3xl font-bold text-gray-900">{stats.totalHours}</div>
           <div className="text-sm text-gray-500 mt-1">Total hours</div>
@@ -184,7 +184,7 @@ function DashboardTab({ stats, registeredEvents }) {
               <Link
                 key={event.id}
                 to={`/events/${event.id ?? event._id}`}
-                className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
+                className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-emerald-600 hover:shadow-md transition-all"
               >
                 <img
                   src={event.bannerImage || 'https://placehold.co/80x80?text=Event'}
@@ -209,7 +209,7 @@ function DashboardTab({ stats, registeredEvents }) {
         ) : (
           <div className="text-center py-12 text-gray-500">
             <p className="text-lg">No upcoming events. Browse and register for events to get started.</p>
-            <Link to="/events" className="mt-4 inline-block text-blue-600 font-semibold hover:underline">
+            <Link to="/events" className="mt-4 inline-block text-emerald-700 font-semibold hover:underline">
               Explore Events
             </Link>
           </div>
@@ -252,7 +252,7 @@ function EventsTab({ registeredEvents, completedEvents, onRefresh }) {
           onClick={() => setEventTab('registered')}
           className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
             eventTab === 'registered'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-emerald-700 text-white'
               : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
           }`}
         >
@@ -262,7 +262,7 @@ function EventsTab({ registeredEvents, completedEvents, onRefresh }) {
           onClick={() => setEventTab('completed')}
           className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
             eventTab === 'completed'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-emerald-700 text-white'
               : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
           }`}
         >
@@ -292,9 +292,9 @@ function EventsTab({ registeredEvents, completedEvents, onRefresh }) {
                   />
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm text-blue-600 font-semibold">{event.ngoName || 'NGO'}</div>
+                      <div className="text-sm text-emerald-700 font-semibold">{event.ngoName || 'NGO'}</div>
                       {isApprovedOrConfirmed && confirmedRole && (
-                        <span className="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">
+                        <span className="px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">
                           Role: {confirmedRole}
                         </span>
                       )}
@@ -324,7 +324,7 @@ function EventsTab({ registeredEvents, completedEvents, onRefresh }) {
                         <button
                           onClick={() => handleAcceptOffer(regId)}
                           disabled={acting}
-                          className="flex-1 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50"
+                          className="flex-1 px-4 py-2 bg-emerald-700 text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50"
                         >
                           {acting ? '...' : 'Accept Role'}
                         </button>
@@ -339,7 +339,7 @@ function EventsTab({ registeredEvents, completedEvents, onRefresh }) {
                     )}
                     <Link
                       to={`/events/${event.id ?? event._id}`}
-                      className="block w-full text-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                      className="block w-full text-center px-4 py-2 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors"
                     >
                       View Details
                     </Link>
@@ -349,7 +349,7 @@ function EventsTab({ registeredEvents, completedEvents, onRefresh }) {
             })
           ) : (
             <div className="col-span-2 text-center py-12 bg-white rounded-xl text-gray-500">
-              No registered events yet. <Link to="/events" className="text-blue-600 hover:underline">Browse events</Link>
+              No registered events yet. <Link to="/events" className="text-emerald-700 hover:underline">Browse events</Link>
             </div>
           ))}
 
@@ -365,7 +365,7 @@ function EventsTab({ registeredEvents, completedEvents, onRefresh }) {
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-sm text-gray-600 font-semibold">{event.ngoName || 'NGO'}</div>
-                    <div className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">
+                    <div className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
                       Completed
                     </div>
                   </div>
@@ -409,10 +409,10 @@ function CertificatesTab({ certificates }) {
           {certificates.map((cert) => (
             <div
               key={cert.id}
-              className="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-600"
+              className="bg-white rounded-xl shadow-md p-6 border-t-4 border-emerald-700"
             >
               <div className="flex items-center justify-between mb-4">
-                <Award className="h-12 w-12 text-blue-600" />
+                <Award className="h-12 w-12 text-emerald-700" />
                 <span className="text-sm text-gray-500">{cert.hours ?? 0} hours</span>
               </div>
               <h3 className="font-bold text-gray-900 mb-1">{cert.eventName || 'Event'}</h3>
@@ -426,7 +426,7 @@ function CertificatesTab({ certificates }) {
                     })
                   : ''}
               </p>
-              <button className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="w-full flex items-center justify-center px-4 py-2 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors">
                 <Download className="h-4 w-4 mr-2" />
                 Download
               </button>
@@ -536,7 +536,7 @@ function ProfileTab() {
               placeholder="e.g., Teaching, Communication, Leadership"
               value={skillsInput}
               onChange={(e) => setSkillsInput(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
             <p className="text-xs text-gray-500 mt-1">Separate skills with commas</p>
           </div>
@@ -545,7 +545,7 @@ function ProfileTab() {
             <select
               value={experienceLevel}
               onChange={(e) => setExperienceLevel(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             >
               <option value="">Select level</option>
               <option value="Beginner">Beginner</option>
@@ -557,7 +557,7 @@ function ProfileTab() {
           {message && (
             <div
               className={`p-3 rounded-lg text-sm ${
-                message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
               }`}
             >
               {message.text}
@@ -567,7 +567,7 @@ function ProfileTab() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold py-3 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
@@ -576,3 +576,4 @@ function ProfileTab() {
     </div>
   );
 }
+

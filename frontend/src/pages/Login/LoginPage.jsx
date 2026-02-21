@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getDashboardPath } from '../../utils/constants';
@@ -62,7 +62,7 @@ export default function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
             className="mb-6"
           />
           <Button type="submit" disabled={loading} className="w-full">
@@ -70,7 +70,7 @@ export default function LoginPage() {
           </Button>
           <p className="mt-6 text-center text-gray-600 text-sm">
             Don&apos;t have an account?{' '}
-            <Link to="/register" className="text-blue-600 font-semibold hover:underline">
+            <Link to="/register" className="text-emerald-700 font-semibold hover:underline">
               Register
             </Link>
           </p>
@@ -79,3 +79,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

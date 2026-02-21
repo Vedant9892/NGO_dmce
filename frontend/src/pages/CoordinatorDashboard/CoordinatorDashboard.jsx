@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Users, Eye, ChevronDown, ChevronUp } from 'lucide-react';
 import { getCoordinatorEvents } from '../../services/eventService';
@@ -53,7 +53,7 @@ export default function CoordinatorDashboard() {
           <p className="text-red-600 text-lg mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800"
           >
             Retry
           </button>
@@ -64,10 +64,10 @@ export default function CoordinatorDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-blue-600 to-green-500 text-white py-8 px-4 sm:px-6 lg:px-8">
+      <div className="bg-gradient-to-r from-emerald-700 to-emerald-500 text-white py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold mb-2">Coordinator Dashboard</h1>
-          <p className="text-blue-100">Manage events assigned to you</p>
+          <p className="text-emerald-100">Manage events assigned to you</p>
         </div>
       </div>
 
@@ -98,27 +98,27 @@ export default function CoordinatorDashboard() {
                         <div>
                           <h3 className="text-xl font-bold text-gray-900 mb-1">{event.title}</h3>
                           <p className="text-sm text-gray-600">
-                            {event.location || 'TBD'} • {event.mode || 'Offline'}
+                            {event.location || 'TBD'} â€¢ {event.mode || 'Offline'}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Link
                             to={`/events/${event.id ?? event._id}`}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-2 text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                             title="View"
                           >
                             <Eye className="h-5 w-5" />
                           </Link>
                           <Link
                             to={`/events/${event.id ?? event._id}?markAttendance=true`}
-                            className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
+                            className="px-4 py-2 bg-emerald-700 text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 transition-colors"
                           >
                             Mark Attendance
                           </Link>
                           <button
                             type="button"
                             onClick={() => toggleExpand(event.id)}
-                            className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1"
+                            className="px-4 py-2 bg-emerald-700 text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 transition-colors flex items-center gap-1"
                           >
                             Manage
                             {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -162,7 +162,7 @@ export default function CoordinatorDashboard() {
             <p className="mt-2 text-sm mb-4">Events will appear here when an NGO assigns you as coordinator.</p>
             <Link
               to="/events"
-              className="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-block px-6 py-2 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors"
             >
               Explore Events
             </Link>
@@ -172,3 +172,4 @@ export default function CoordinatorDashboard() {
     </div>
   );
 }
+

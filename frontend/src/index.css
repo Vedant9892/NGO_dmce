@@ -1,12 +1,69 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --theme-bg: #f3f8f6;
+    --theme-surface: #ffffff;
+    --theme-surface-muted: #edf5f1;
+    --theme-border: #d8e7e0;
+    --theme-text: #0f1f1a;
+    --theme-text-muted: #486259;
+    --theme-accent: #0f766e;
+    --theme-accent-strong: #065f46;
+    --theme-gradient-start: #065f46;
+    --theme-gradient-end: #0f766e;
+    --theme-shadow: 0 16px 40px rgba(15, 118, 110, 0.12);
+  }
+
   body {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.15), transparent 45%),
+      radial-gradient(circle at 85% 20%, rgba(20, 184, 166, 0.16), transparent 40%),
+      var(--theme-bg);
+    color: var(--theme-text);
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: rgba(15, 118, 110, 0.22);
+    color: #052e2b;
+  }
+}
+
+@layer components {
+  .theme-page {
+    @apply text-slate-900;
+  }
+
+  .theme-glass-nav {
+    background: rgba(255, 255, 255, 0.78);
+    border-bottom: 1px solid rgba(216, 231, 224, 0.85);
+    backdrop-filter: blur(12px);
+  }
+
+  .theme-card {
+    @apply bg-white rounded-2xl border border-emerald-100;
+    box-shadow: var(--theme-shadow);
+  }
+
+  .theme-panel {
+    @apply bg-white/90 border border-emerald-100 rounded-xl;
+  }
+
+  .theme-accent-gradient {
+    @apply bg-gradient-to-r from-emerald-800 to-teal-600 text-white;
+  }
+
+  .theme-focus {
+    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-white;
   }
 }
 

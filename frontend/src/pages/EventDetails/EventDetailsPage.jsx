@@ -1,4 +1,4 @@
-import { useParams, Link, useSearchParams } from 'react-router-dom';
+﻿import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { MapPin, Calendar, Users, Mail, Share2, Bookmark, Clock, CheckCircle, Award, ArrowLeft, UserCheck, X } from 'lucide-react';
 import { getEventById, registerForEvent, getCoordinatorEventVolunteers, markAttendance } from '../../services/eventService';
@@ -37,7 +37,7 @@ function RoleSelectModal({ eventRoles, selectedRole, onSelect, onSubmit, onClose
               <label
                 key={role.title}
                 className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer ${
-                  selectedRole === role.title ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                  selectedRole === role.title ? 'border-emerald-700 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ function RoleSelectModal({ eventRoles, selectedRole, onSelect, onSubmit, onClose
             type="button"
             onClick={onSubmit}
             disabled={!selectedRole || loading}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-4 py-2 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Registering...' : 'Submit Registration'}
           </button>
@@ -195,7 +195,7 @@ export default function EventDetailsPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Event Not Found</h2>
-          <Link to="/events" className="text-blue-600 hover:underline">
+          <Link to="/events" className="text-emerald-700 hover:underline">
             Back to Events
           </Link>
         </div>
@@ -229,7 +229,7 @@ export default function EventDetailsPage() {
           <div className="max-w-7xl mx-auto">
             <Link
               to="/events"
-              className="inline-flex items-center text-white mb-4 hover:text-blue-300 transition-colors"
+              className="inline-flex items-center text-white mb-4 hover:text-emerald-300 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Events
@@ -259,7 +259,7 @@ export default function EventDetailsPage() {
                 <ul className="space-y-3">
                   {roles.map((role, index) => (
                     <li key={index} className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="h-5 w-5 text-emerald-600 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{role}</span>
                     </li>
                   ))}
@@ -273,7 +273,7 @@ export default function EventDetailsPage() {
                 <ul className="space-y-3">
                   {eligibility.map((criterion, index) => (
                     <li key={index} className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-blue-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="h-5 w-5 text-emerald-600 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{criterion}</span>
                     </li>
                   ))}
@@ -288,7 +288,7 @@ export default function EventDetailsPage() {
                   {skills.map((skill, index) => (
                     <span
                       key={index}
-                      className="px-4 py-2 bg-blue-50 text-blue-600 font-medium rounded-lg"
+                      className="px-4 py-2 bg-emerald-50 text-emerald-700 font-medium rounded-lg"
                     >
                       {skill}
                     </span>
@@ -304,9 +304,9 @@ export default function EventDetailsPage() {
                   {timeline.map((item, index) => (
                     <div key={index} className="flex items-start">
                       <div className="flex-shrink-0 w-24">
-                        <span className="text-blue-600 font-semibold">{item.time}</span>
+                        <span className="text-emerald-700 font-semibold">{item.time}</span>
                       </div>
-                      <div className="flex-1 border-l-2 border-blue-200 pl-4 pb-4">
+                      <div className="flex-1 border-l-2 border-emerald-200 pl-4 pb-4">
                         <p className="text-gray-700">{item.activity}</p>
                       </div>
                     </div>
@@ -316,15 +316,15 @@ export default function EventDetailsPage() {
             )}
 
             {perks.length > 0 && (
-              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl shadow-md p-8">
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-50 rounded-xl shadow-md p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Award className="h-6 w-6 mr-2 text-green-600" />
+                  <Award className="h-6 w-6 mr-2 text-emerald-700" />
                   Perks & Benefits
                 </h2>
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {perks.map((perk, index) => (
                     <li key={index} className="flex items-start">
-                      <CheckCircle className="h-5 w-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="h-5 w-5 text-emerald-700 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{perk}</span>
                     </li>
                   ))}
@@ -378,7 +378,7 @@ export default function EventDetailsPage() {
                   <button
                     onClick={handleRegisterClick}
                     disabled={registering || spotsLeft <= 0 || registered}
-                    className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="w-full bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {registered ? 'Registered' : registering ? 'Registering...' : spotsLeft <= 0 ? 'Event Full' : 'Register Now'}
                   </button>
@@ -397,16 +397,16 @@ export default function EventDetailsPage() {
               {!token && (
                 <Link
                   to="/login"
-                  className="block w-full text-center bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3"
+                  className="block w-full text-center bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3"
                 >
                   Login to Register
                 </Link>
               )}
 
               {isCoordinator && showAttendance && volunteers.length > 0 && (
-                <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="mb-6 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    <UserCheck className="h-5 w-5 mr-2 text-green-600" />
+                    <UserCheck className="h-5 w-5 mr-2 text-emerald-700" />
                     Mark Attendance
                   </h3>
                   <div className="space-y-2 max-h-40 overflow-y-auto mb-3">
@@ -425,7 +425,7 @@ export default function EventDetailsPage() {
                           />
                           <span>{v.name || v.email || 'Volunteer'}</span>
                           {v.status === 'attended' && (
-                            <span className="text-green-600 text-xs">✓ Attended</span>
+                            <span className="text-emerald-700 text-xs">âœ“ Attended</span>
                           )}
                         </label>
                       ))}
@@ -433,7 +433,7 @@ export default function EventDetailsPage() {
                   <button
                     onClick={handleMarkAttendance}
                     disabled={selectedVolunteers.length === 0 || attendanceLoading}
-                    className="w-full px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    className="w-full px-4 py-2 bg-emerald-700 text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50"
                   >
                     {attendanceLoading ? 'Marking...' : `Mark ${selectedVolunteers.length} Attended`}
                   </button>
@@ -443,7 +443,7 @@ export default function EventDetailsPage() {
               {isCoordinator && !showAttendance && (
                 <Link
                   to={`/events/${id}?markAttendance=true`}
-                  className="block w-full text-center px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 mb-3"
+                  className="block w-full text-center px-4 py-2 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 mb-3"
                 >
                   Mark Attendance
                 </Link>
@@ -465,7 +465,7 @@ export default function EventDetailsPage() {
                   <h3 className="font-semibold text-gray-900 mb-3">Contact NGO</h3>
                   <a
                     href={`mailto:${event.contactEmail}`}
-                    className="flex items-center text-blue-600 hover:text-blue-700"
+                    className="flex items-center text-emerald-700 hover:text-emerald-700"
                   >
                     <Mail className="h-4 w-4 mr-2" />
                     {event.contactEmail}
@@ -479,3 +479,4 @@ export default function EventDetailsPage() {
     </div>
   );
 }
+

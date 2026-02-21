@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { UserPlus, Trash2, Users } from 'lucide-react';
 import { createNGOCoordinator, deleteNGOCoordinator } from '../../services/eventService';
 import Loader from '../../components/ui/Loader';
@@ -73,7 +73,7 @@ export default function ManageCoordinatorsTab({ coordinators, onRefresh }) {
         <button
           type="button"
           onClick={handleOpenModal}
-          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
+          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
         >
           <UserPlus className="h-5 w-5 mr-2" />
           Add Coordinator
@@ -107,10 +107,10 @@ export default function ManageCoordinatorsTab({ coordinators, onRefresh }) {
               {coordinators.map((c) => (
                 <tr key={c.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                    {c.name ?? '—'}
+                    {c.name ?? 'â€”'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {c.email ?? '—'}
+                    {c.email ?? 'â€”'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {c.createdAt
@@ -119,7 +119,7 @@ export default function ManageCoordinatorsTab({ coordinators, onRefresh }) {
                           day: 'numeric',
                           year: 'numeric',
                         })
-                      : '—'}
+                      : 'â€”'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <button
@@ -144,7 +144,7 @@ export default function ManageCoordinatorsTab({ coordinators, onRefresh }) {
             <button
               type="button"
               onClick={handleOpenModal}
-              className="mt-4 inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              className="mt-4 inline-flex items-center px-6 py-3 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 transition-colors"
             >
               <UserPlus className="h-5 w-5 mr-2" />
               Add Coordinator
@@ -173,7 +173,7 @@ export default function ManageCoordinatorsTab({ coordinators, onRefresh }) {
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       placeholder="Coordinator name"
                       required
                     />
@@ -187,7 +187,7 @@ export default function ManageCoordinatorsTab({ coordinators, onRefresh }) {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       placeholder="coordinator@example.com"
                       required
                     />
@@ -201,7 +201,7 @@ export default function ManageCoordinatorsTab({ coordinators, onRefresh }) {
                       type="password"
                       value={formData.password}
                       onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                       placeholder="Min 6 characters"
                       required
                       minLength={6}
@@ -219,7 +219,7 @@ export default function ManageCoordinatorsTab({ coordinators, onRefresh }) {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-lg disabled:opacity-50"
+                    className="px-6 py-2 bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold rounded-lg hover:shadow-lg disabled:opacity-50"
                   >
                     {submitting ? 'Creating...' : 'Add Coordinator'}
                   </button>
@@ -232,3 +232,4 @@ export default function ManageCoordinatorsTab({ coordinators, onRefresh }) {
     </div>
   );
 }
+
