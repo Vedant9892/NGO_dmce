@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users,
@@ -45,9 +45,9 @@ function exportAttendanceCSV(volunteers, eventTitle) {
 
 function StatusBadge({ status }) {
   const styles = {
-    attended: 'bg-green-100 text-green-800',
-    confirmed: 'bg-blue-100 text-blue-800',
-    approved: 'bg-blue-100 text-blue-800',
+    attended: 'bg-emerald-100 text-emerald-800',
+    confirmed: 'bg-emerald-100 text-emerald-800',
+    approved: 'bg-emerald-100 text-emerald-800',
     pending: 'bg-amber-100 text-amber-800',
     role_offered: 'bg-purple-100 text-purple-800',
     rejected: 'bg-red-100 text-red-800',
@@ -129,7 +129,7 @@ function OfferRoleModal({ event, registrationId, volunteerName, availableRoles, 
             type="button"
             onClick={handleSubmit}
             disabled={!selectedRole || loading}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50"
           >
             {loading ? 'Offering...' : 'Offer Role'}
           </button>
@@ -256,14 +256,14 @@ export default function EventAttendancePanel({ event }) {
               <UserCheck className="h-4 w-4 mr-1" />
               Attended
             </div>
-            <div className="text-2xl font-bold text-green-600">{attended}</div>
+            <div className="text-2xl font-bold text-emerald-700">{attended}</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center text-gray-500 text-sm mb-1">
               <Percent className="h-4 w-4 mr-1" />
               Attendance %
             </div>
-            <div className="text-2xl font-bold text-blue-600">{percent}%</div>
+            <div className="text-2xl font-bold text-emerald-700">{percent}%</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center text-gray-500 text-sm mb-1">
@@ -275,10 +275,10 @@ export default function EventAttendancePanel({ event }) {
           <div className="bg-white rounded-lg shadow-sm p-4 col-span-2 md:col-span-2">
             <div className="text-gray-500 text-sm mb-2">Status breakdown</div>
             <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+              <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm">
                 Registered {total}
               </span>
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+              <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm">
                 Attended {attended}
               </span>
               <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">
@@ -293,7 +293,7 @@ export default function EventAttendancePanel({ event }) {
             type="button"
             onClick={handleMarkSelected}
             disabled={selectedIds.length === 0 || attendanceLoading}
-            className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className="px-4 py-2 bg-emerald-700 text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             <CheckSquare className="h-4 w-4 mr-2" />
             Mark Selected ({selectedIds.length})
@@ -302,7 +302,7 @@ export default function EventAttendancePanel({ event }) {
             type="button"
             onClick={handleMarkAllPresent}
             disabled={!canMarkAll || attendanceLoading}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className="px-4 py-2 bg-emerald-700 text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             <UserCheck className="h-4 w-4 mr-2" />
             Mark All Present
@@ -376,10 +376,10 @@ export default function EventAttendancePanel({ event }) {
                           {v.name || 'N/A'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">
-                          {skills.length > 0 ? skills.join(', ') : '—'}
+                          {skills.length > 0 ? skills.join(', ') : 'â€”'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600">
-                          {v.appliedRole || v.offeredRole || '—'}
+                          {v.appliedRole || v.offeredRole || 'â€”'}
                         </td>
                         <td className="px-4 py-3">
                           <StatusBadge status={v.status} />
@@ -391,7 +391,7 @@ export default function EventAttendancePanel({ event }) {
                                 type="button"
                                 onClick={() => handleApprove(v.id)}
                                 disabled={acting}
-                                className="px-2 py-1 text-xs font-semibold bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                                className="px-2 py-1 text-xs font-semibold bg-emerald-700 text-white rounded hover:bg-emerald-800 disabled:opacity-50"
                               >
                                 {acting ? '...' : 'Approve'}
                               </button>
@@ -408,7 +408,7 @@ export default function EventAttendancePanel({ event }) {
                                   type="button"
                                   onClick={() => setOfferModalFor(v)}
                                   disabled={acting}
-                                  className="px-2 py-1 text-xs font-semibold bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                                  className="px-2 py-1 text-xs font-semibold bg-emerald-700 text-white rounded hover:bg-emerald-800 disabled:opacity-50"
                                 >
                                   Offer Role
                                 </button>
@@ -449,3 +449,4 @@ export default function EventAttendancePanel({ event }) {
     </div>
   );
 }
+

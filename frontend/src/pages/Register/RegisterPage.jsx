@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Users, Building2, Heart } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -77,12 +77,12 @@ export default function RegisterPage() {
                     onClick={() => setRole(opt.value)}
                     className={`flex items-start gap-3 p-4 rounded-lg border-2 text-left transition-colors ${
                       isSelected
-                        ? 'border-blue-600 bg-blue-50'
+                        ? 'border-emerald-700 bg-emerald-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                      <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-600' : 'text-gray-600'}`} />
+                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                      <Icon className={`h-5 w-5 ${isSelected ? 'text-emerald-700' : 'text-gray-600'}`} />
                     </div>
                     <div>
                       <div className="font-semibold text-gray-900">{opt.label}</div>
@@ -118,7 +118,7 @@ export default function RegisterPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
             className="mb-4"
           />
           {needsOrganization && (
@@ -138,7 +138,7 @@ export default function RegisterPage() {
           </Button>
           <p className="mt-6 text-center text-gray-600 text-sm">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+            <Link to="/login" className="text-emerald-700 font-semibold hover:underline">
               Sign In
             </Link>
           </p>
@@ -147,3 +147,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Calendar, TrendingUp, Clock, Plus, Edit, Trash2, Eye, BarChart3, UserCheck } from 'lucide-react';
 import {
@@ -73,7 +73,7 @@ export default function NGODashboard() {
           <p className="text-red-600 text-lg mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800"
           >
             Retry
           </button>
@@ -91,15 +91,15 @@ export default function NGODashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-blue-600 to-green-500 text-white py-8 px-4 sm:px-6 lg:px-8">
+      <div className="bg-gradient-to-r from-emerald-700 to-emerald-500 text-white py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
             <h1 className="text-3xl font-bold mb-2">NGO Dashboard</h1>
-            <p className="text-blue-100">Manage your events and track volunteer engagement</p>
+            <p className="text-emerald-100">Manage your events and track volunteer engagement</p>
           </div>
           <Link
             to="/create-event"
-            className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:shadow-lg transition-all"
+            className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 bg-white text-emerald-700 font-semibold rounded-lg hover:shadow-lg transition-all"
           >
             <Plus className="h-5 w-5 mr-2" />
             Create Event
@@ -116,7 +116,7 @@ export default function NGODashboard() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-6 py-4 font-semibold transition-colors capitalize ${
                   activeTab === tab
-                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    ? 'text-emerald-700 border-b-2 border-emerald-700'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -149,21 +149,21 @@ function OverviewTab({ stats, events }) {
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-emerald-600">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-600">Total Volunteers</span>
-            <Users className="h-6 w-6 text-blue-500" />
+            <Users className="h-6 w-6 text-emerald-600" />
           </div>
           <div className="text-3xl font-bold text-gray-900">{stats.totalVolunteers}</div>
-          <div className="text-sm text-gray-500 mt-1">—</div>
+          <div className="text-sm text-gray-500 mt-1">â€”</div>
         </div>
-        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+        <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-emerald-500">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-600">Active Events</span>
-            <Calendar className="h-6 w-6 text-green-500" />
+            <Calendar className="h-6 w-6 text-emerald-600" />
           </div>
           <div className="text-3xl font-bold text-gray-900">{stats.activeEvents}</div>
-          <div className="text-sm text-gray-500 mt-1">—</div>
+          <div className="text-sm text-gray-500 mt-1">â€”</div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
           <div className="flex items-center justify-between mb-2">
@@ -171,7 +171,7 @@ function OverviewTab({ stats, events }) {
             <TrendingUp className="h-6 w-6 text-purple-500" />
           </div>
           <div className="text-3xl font-bold text-gray-900">{stats.attendanceRate}%</div>
-          <div className="text-sm text-gray-500 mt-1">—</div>
+          <div className="text-sm text-gray-500 mt-1">â€”</div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500">
           <div className="flex items-center justify-between mb-2">
@@ -190,7 +190,7 @@ function OverviewTab({ stats, events }) {
             {events.slice(0, 5).map((event) => (
               <div
                 key={event.id}
-                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-500 transition-colors"
+                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-emerald-600 transition-colors"
               >
                 <div className="flex items-center">
                   <img
@@ -208,7 +208,7 @@ function OverviewTab({ stats, events }) {
                 <div className="flex items-center space-x-2">
                   <Link
                     to={`/events/${event.id ?? event._id}`}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="p-2 text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                   >
                     <Eye className="h-5 w-5" />
                   </Link>
@@ -222,7 +222,7 @@ function OverviewTab({ stats, events }) {
         ) : (
           <div className="text-center py-12 text-gray-500">
             <p>No events yet. Create your first event to get started.</p>
-            <Link to="/create-event" className="mt-4 inline-block text-blue-600 font-semibold hover:underline">
+            <Link to="/create-event" className="mt-4 inline-block text-emerald-700 font-semibold hover:underline">
               Create Event
             </Link>
           </div>
@@ -279,7 +279,7 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
         <h2 className="text-2xl font-bold text-gray-900">Your Events</h2>
         <Link
           to="/create-event"
-          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
+          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
         >
           <Plus className="h-5 w-5 mr-2" />
           Create New Event
@@ -304,10 +304,10 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 mb-1">{event.title}</h3>
                       <p className="text-sm text-gray-600">
-                        {event.location || 'TBD'} • {event.mode || 'Offline'}
+                        {event.location || 'TBD'} â€¢ {event.mode || 'Offline'}
                       </p>
                       {event.coordinatorId && (
-                        <p className="text-sm text-blue-600 mt-1">
+                        <p className="text-sm text-emerald-700 mt-1">
                           Coordinator: {event.coordinatorId?.name || event.coordinatorId}
                         </p>
                       )}
@@ -315,7 +315,7 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
                     <div className="flex items-center space-x-2">
                       <Link
                         to={`/events/${event.id ?? event._id}`}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                         title="View"
                       >
                         <Eye className="h-5 w-5" />
@@ -331,7 +331,7 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
                       <button
                         type="button"
                         onClick={() => handleOpenAssignCoordinator(event)}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        className="p-2 text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                         title="Assign Coordinator"
                       >
                         <UserCheck className="h-5 w-5" />
@@ -370,7 +370,7 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
                       <span
                         className={`font-semibold ${
                           (event.volunteersRegistered ?? 0) >= (event.volunteersRequired ?? 1)
-                            ? 'text-green-600'
+                            ? 'text-emerald-700'
                             : 'text-orange-600'
                         }`}
                       >
@@ -388,7 +388,7 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
       ) : (
         <div className="text-center py-12 bg-white rounded-xl text-gray-500">
           <p className="text-lg">No events yet. Create your first event to get started.</p>
-          <Link to="/create-event" className="mt-4 inline-block text-blue-600 font-semibold hover:underline">
+          <Link to="/create-event" className="mt-4 inline-block text-emerald-700 font-semibold hover:underline">
             Create Event
           </Link>
         </div>
@@ -422,7 +422,7 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
                     id="edit-coordinatorId"
                     value={coordinatorId}
                     onChange={(e) => setCoordinatorId(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
                   >
                     <option value="">None</option>
                     {coordinators.map((c) => (
@@ -446,7 +446,7 @@ function ManageEventsTab({ events, coordinators = [], onRefresh }) {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-lg hover:shadow-lg disabled:opacity-50"
+                    className="px-6 py-2 bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold rounded-lg hover:shadow-lg disabled:opacity-50"
                   >
                     {saving ? 'Saving...' : 'Save'}
                   </button>
@@ -490,10 +490,10 @@ function RegistrationsTab({ registrations }) {
               {registrations.map((reg) => (
                 <tr key={reg.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-medium text-gray-900">{reg.volunteerName ?? reg.name ?? '—'}</div>
+                    <div className="font-medium text-gray-900">{reg.volunteerName ?? reg.name ?? 'â€”'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {reg.eventName ?? reg.event ?? '—'}
+                    {reg.eventName ?? reg.event ?? 'â€”'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {reg.date
@@ -502,13 +502,13 @@ function RegistrationsTab({ registrations }) {
                           day: 'numeric',
                           year: 'numeric',
                         })
-                      : '—'}
+                      : 'â€”'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
                         (reg.status ?? '').toLowerCase() === 'confirmed'
-                          ? 'bg-green-100 text-green-600'
+                          ? 'bg-emerald-100 text-emerald-700'
                           : 'bg-yellow-100 text-yellow-600'
                       }`}
                     >
@@ -516,7 +516,7 @@ function RegistrationsTab({ registrations }) {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <button className="text-blue-600 hover:text-blue-700 font-medium">
+                    <button className="text-emerald-700 hover:text-emerald-700 font-medium">
                       View Details
                     </button>
                   </td>
@@ -590,7 +590,7 @@ function AttendanceTab({ events }) {
                             month: 'short',
                             day: 'numeric',
                           })
-                        : '—'}
+                        : 'â€”'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{registered}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{attended}</td>
@@ -598,7 +598,7 @@ function AttendanceTab({ events }) {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
                           rate >= 90
-                            ? 'bg-green-100 text-green-600'
+                            ? 'bg-emerald-100 text-emerald-700'
                             : rate >= 70
                             ? 'bg-yellow-100 text-yellow-600'
                             : 'bg-red-100 text-red-600'
@@ -633,10 +633,10 @@ function ReportsTab() {
           Reports will be available once you have event and volunteer data.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="px-6 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors">
+          <button className="px-6 py-3 border-2 border-emerald-700 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors">
             Download Volunteer Report
           </button>
-          <button className="px-6 py-3 border-2 border-green-600 text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors">
+          <button className="px-6 py-3 border-2 border-emerald-700 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors">
             Download Event Report
           </button>
           <button className="px-6 py-3 border-2 border-purple-600 text-purple-600 font-semibold rounded-lg hover:bg-purple-50 transition-colors">
@@ -647,3 +647,4 @@ function ReportsTab() {
     </div>
   );
 }
+

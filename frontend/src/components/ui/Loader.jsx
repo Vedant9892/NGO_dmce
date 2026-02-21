@@ -1,4 +1,4 @@
-export default function Loader({ size = 'md' }) {
+﻿export default function Loader({ size = 'md' }) {
   const sizes = {
     sm: 'h-6 w-6 border-2',
     md: 'h-10 w-10 border-2',
@@ -7,8 +7,9 @@ export default function Loader({ size = 'md' }) {
   return (
     <div className="flex justify-center items-center">
       <div
-        className={`${sizes[size]} border-blue-600 border-t-transparent rounded-full animate-spin`}
+        className={`${sizes[size]} border-emerald-700 border-t-transparent rounded-full animate-spin`}
       />
     </div>
   );
 }
+
