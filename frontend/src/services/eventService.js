@@ -117,6 +117,16 @@ export const markAttendance = async (eventId, volunteerIds) => {
   return data;
 };
 
+export const getAttendanceCode = async (eventId) => {
+  const { data } = await api.get(`/coordinator/events/${eventId}/attendance-code`);
+  return data?.data ?? data;
+};
+
+export const markSelfAttendance = async (eventId, payload) => {
+  const { data } = await api.post(`/events/${eventId}/self-attendance`, payload);
+  return data;
+};
+
 export const getNGORegistrations = async () => {
   try {
     const { data } = await api.get('/ngo/registrations');

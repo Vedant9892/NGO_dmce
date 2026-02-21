@@ -6,9 +6,10 @@ import {
   getEventById,
   registerForEvent,
   markAttendance,
+  markSelfAttendance,
   upload,
 } from '../controllers/event.controller.js';
-import { protect } from '../middlewares/auth.middleware.js';
+import { protect, optionalAuth } from '../middlewares/auth.middleware.js';
 import { allowRoles } from '../middlewares/role.middleware.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
@@ -32,7 +33,7 @@ router.post(
 );
 
 // Dynamic :id routes (after all static routes)
-router.get('/:id', getEventById);
+router.get('/:id', optionalAuth, getEventById);
 
 router.put(
   '/:id',
@@ -59,6 +60,13 @@ router.put(
   protect,
   allowRoles('coordinator'),
   asyncHandler(markAttendance)
+);
+
+router.post(
+  '/:id/self-attendance',
+  protect,
+  allowRoles('volunteer'),
+  asyncHandler(markSelfAttendance)
 );
 
 export default router;

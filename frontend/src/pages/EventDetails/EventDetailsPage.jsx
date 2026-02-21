@@ -1,82 +1,10 @@
-﻿import { useParams, Link, useSearchParams } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { MapPin, Calendar, Users, Mail, Share2, Bookmark, Clock, CheckCircle, Award, ArrowLeft, UserCheck, X } from 'lucide-react';
+import { MapPin, Calendar, Mail, Share2, Bookmark, Clock, CheckCircle, Award, ArrowLeft, UserCheck, QrCode } from 'lucide-react';
 import { getEventById, registerForEvent, getCoordinatorEventVolunteers, markAttendance } from '../../services/eventService';
+import MarkAttendanceModal from '../../components/attendance/MarkAttendanceModal';
 import { useAuth } from '../../hooks/useAuth';
 import Loader from '../../components/ui/Loader';
-
-function RoleSelectModal({ eventRoles, selectedRole, onSelect, onSubmit, onClose, loading }) {
-  const availableRoles = eventRoles.filter((r) => {
-    const filled = r.filledSlots ?? 0;
-    const slots = r.slots ?? 0;
-    return slots > 0 && filled < slots;
-  });
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-900">Select a Role</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 text-gray-500 hover:text-gray-700 rounded"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <p className="text-sm text-gray-600 mb-4">
-          Choose the role you would like to apply for in this event.
-        </p>
-        <div className="space-y-2 mb-6">
-          {availableRoles.map((role) => {
-            const filled = role.filledSlots ?? 0;
-            const slots = role.slots ?? 0;
-            const available = slots - filled;
-            return (
-              <label
-                key={role.title}
-                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer ${
-                  selectedRole === role.title ? 'border-emerald-700 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="role"
-                    value={role.title}
-                    checked={selectedRole === role.title}
-                    onChange={() => onSelect(role.title)}
-                    className="rounded-full"
-                  />
-                  <span className="font-medium text-gray-900">{role.title}</span>
-                </div>
-                <span className="text-sm text-gray-500">{available} spot(s) left</span>
-              </label>
-            );
-          })}
-        </div>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onSubmit}
-            disabled={!selectedRole || loading}
-            className="flex-1 px-4 py-2 bg-emerald-700 text-white font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Registering...' : 'Submit Registration'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function EventDetailsPage() {
   const { id } = useParams();
@@ -90,11 +18,12 @@ export default function EventDetailsPage() {
   const [error, setError] = useState(null);
   const [registering, setRegistering] = useState(false);
   const [registered, setRegistered] = useState(false);
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('');
+  const [registrationStatus, setRegistrationStatus] = useState(null);
+  const [regError, setRegError] = useState(null);
   const [volunteers, setVolunteers] = useState([]);
   const [selectedVolunteers, setSelectedVolunteers] = useState([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [showMarkAttendanceModal, setShowMarkAttendanceModal] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -103,7 +32,17 @@ export default function EventDetailsPage() {
     setError(null);
     getEventById(id)
       .then((data) => {
-        if (!cancelled) setEvent(data);
+        if (!cancelled) {
+          setEvent(data);
+          setRegError(null);
+          if (data?.myRegistrationStatus) {
+            setRegistered(true);
+            setRegistrationStatus(data.myRegistrationStatus);
+          } else {
+            setRegistered(false);
+            setRegistrationStatus(null);
+          }
+        }
       })
       .catch((err) => {
         if (!cancelled) {
@@ -116,6 +55,19 @@ export default function EventDetailsPage() {
       });
     return () => { cancelled = true; };
   }, [id]);
+
+  // Poll for approval status when volunteer is waiting (so button turns green when approved)
+  useEffect(() => {
+    if (!id || !isVolunteer || registrationStatus !== 'pending') return;
+    const interval = setInterval(() => {
+      getEventById(id).then((data) => {
+        if (data?.myRegistrationStatus && data.myRegistrationStatus !== 'pending') {
+          setRegistrationStatus(data.myRegistrationStatus);
+        }
+      }).catch(() => {});
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [id, isVolunteer, registrationStatus]);
 
   useEffect(() => {
     if (!id || !isCoordinator || !showAttendance) return;
@@ -149,37 +101,36 @@ export default function EventDetailsPage() {
   };
 
   const eventRoles = event?.eventRoles ?? [];
-  const hasEventRoles = eventRoles.length > 0;
+  const firstValidRole = eventRoles.find((r) => r?.title?.trim())?.title?.trim() || null;
 
   const handleRegisterClick = () => {
+    setRegError(null);
     if (!token) {
       window.location.href = '/login';
       return;
     }
-    if (!event?.id || registering || registered) return;
-    if (hasEventRoles) {
-      setSelectedRole(eventRoles[0]?.title ?? '');
-      setShowRoleModal(true);
-    } else {
-      handleRegister(null);
-    }
+    const eventId = event?.id ?? event?._id;
+    if (!eventId || registering || registered || registrationStatus) return;
+    handleRegister(firstValidRole);
   };
 
   const handleRegister = async (appliedRole = null) => {
-    if (!event?.id || registering || registered) return;
+    const eventId = event?.id ?? event?._id;
+    if (!eventId || registering || registered || registrationStatus) return;
+    setRegError(null);
     setRegistering(true);
-    setShowRoleModal(false);
+    // Optimistic update: instantly show "Waiting for approval" (yellow) before API completes
+    setRegistered(true);
+    setRegistrationStatus('pending');
     try {
-      await registerForEvent(event.id, appliedRole ? { appliedRole } : {});
-      setRegistered(true);
-    } catch {
+      await registerForEvent(eventId, appliedRole ? { appliedRole } : {});
+    } catch (err) {
+      setRegError(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
+      setRegistered(false);
+      setRegistrationStatus(null);
+    } finally {
       setRegistering(false);
     }
-  };
-
-  const handleRoleModalSubmit = () => {
-    if (!selectedRole?.trim()) return;
-    handleRegister(selectedRole.trim());
   };
 
   if (loading) {
@@ -203,13 +154,6 @@ export default function EventDetailsPage() {
     );
   }
 
-  const volunteersRequired = event.volunteersRequired ?? 0;
-  const volunteersRegistered = event.volunteersRegistered ?? 0;
-  const totalRoleSlots = eventRoles.reduce((sum, r) => sum + (r.slots ?? 0), 0);
-  const filledRoleSlots = eventRoles.reduce((sum, r) => sum + (r.filledSlots ?? 0), 0);
-  const spotsLeft = hasEventRoles
-    ? Math.max(0, totalRoleSlots - filledRoleSlots)
-    : Math.max(0, volunteersRequired - volunteersRegistered);
   const roles = event.roles ?? [];
   const eligibility = event.eligibility ?? [];
   const skills = event.skills ?? [];
@@ -365,33 +309,61 @@ export default function EventDetailsPage() {
                     </span>
                   </div>
                 )}
-                <div className="flex items-center text-gray-700">
-                  <Users className="h-5 w-5 mr-3 text-gray-400" />
-                  <span>
-                    <strong>{spotsLeft}</strong> spots available
-                  </span>
-                </div>
               </div>
 
               {isVolunteer && (
                 <>
-                  <button
-                    onClick={handleRegisterClick}
-                    disabled={registering || spotsLeft <= 0 || registered}
-                    className="w-full bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mb-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                  >
-                    {registered ? 'Registered' : registering ? 'Registering...' : spotsLeft <= 0 ? 'Event Full' : 'Register Now'}
-                  </button>
-                  {showRoleModal && hasEventRoles && (
-                    <RoleSelectModal
-                      eventRoles={eventRoles}
-                      selectedRole={selectedRole}
-                      onSelect={setSelectedRole}
-                      onSubmit={handleRoleModalSubmit}
-                      onClose={() => setShowRoleModal(false)}
-                      loading={registering}
-                    />
+                  {regError && (
+                    <div className="mb-3 px-4 py-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
+                      {regError}
+                    </div>
                   )}
+                  {(() => {
+                    const isApproved = registrationStatus && ['approved', 'confirmed', 'role_offered'].includes(registrationStatus);
+                    const isAttended = registrationStatus === 'attended';
+                    const isWaiting = (registered || registrationStatus) && !isApproved && !isAttended;
+                    const canMarkAttendance = ['approved', 'confirmed'].includes(registrationStatus) && !isAttended;
+                    return (
+                      <>
+                        <button
+                          onClick={handleRegisterClick}
+                          disabled={registered || !!registrationStatus}
+                          className={`w-full font-semibold py-3 px-6 rounded-lg transition-all mb-3 disabled:cursor-not-allowed disabled:transform-none ${
+                            isAttended
+                              ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white'
+                              : isApproved
+                              ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white'
+                              : isWaiting
+                              ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-amber-900'
+                              : 'bg-gradient-to-r from-emerald-700 to-emerald-500 text-white hover:shadow-xl transform hover:-translate-y-0.5'
+                          }`}
+                        >
+                          {isAttended ? 'Attendance Marked' : isApproved ? 'Application Approved' : isWaiting ? 'Waiting for Approval' : 'Register Now'}
+                        </button>
+                        {canMarkAttendance && (
+                          <button
+                            type="button"
+                            onClick={() => setShowMarkAttendanceModal(true)}
+                            className="w-full flex items-center justify-center gap-2 py-3 px-6 border-2 border-emerald-600 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors mb-3"
+                          >
+                            <QrCode className="h-5 w-5" />
+                            Mark My Attendance
+                          </button>
+                        )}
+                        {showMarkAttendanceModal && (
+                          <MarkAttendanceModal
+                            eventId={event?.id ?? event?._id}
+                            eventTitle={event?.title}
+                            onClose={() => setShowMarkAttendanceModal(false)}
+                            onSuccess={() => {
+                              setRegistrationStatus('attended');
+                              setShowMarkAttendanceModal(false);
+                            }}
+                          />
+                        )}
+                      </>
+                    );
+                  })()}
                 </>
               )}
               {!token && (

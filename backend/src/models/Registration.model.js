@@ -22,6 +22,17 @@ const registrationSchema = new mongoose.Schema(
     attendedAt: {
       type: Date,
     },
+    markedAt: {
+      type: Date,
+    },
+    markedLocation: {
+      type: String,
+      trim: true,
+    },
+    markedMethod: {
+      type: String,
+      enum: ['qr', 'code'],
+    },
   },
   { timestamps: true }
 );

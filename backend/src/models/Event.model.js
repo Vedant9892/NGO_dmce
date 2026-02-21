@@ -77,6 +77,11 @@ const eventSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    attendanceCode: {
+      type: String,
+      trim: true,
+      sparse: true,
+    },
   },
   { timestamps: true }
 );

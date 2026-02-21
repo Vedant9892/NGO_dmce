@@ -313,13 +313,20 @@ export const getEventById = asyncHandler(async (req, res) => {
     status: { $in: ['pending', 'approved', 'role_offered', 'confirmed', 'attended'] },
   });
 
-  res.json({
-    success: true,
-    data: {
-      ...formatEvent(event),
-      volunteersRegistered: registrations,
-    },
-  });
+  let myRegistrationStatus = null;
+  if (req.user?.role === 'volunteer') {
+    const myReg = await Registration.findOne({
+      eventId: event._id,
+      volunteerId: req.user._id,
+    }).select('status').lean();
+    if (myReg) myRegistrationStatus = myReg.status;
+  }
+
+  const formatted = formatEvent(event, registrations);
+  const data = { ...formatted, volunteersRegistered: registrations };
+  if (myRegistrationStatus) data.myRegistrationStatus = myRegistrationStatus;
+
+  res.json({ success: true, data });
 });
 
 export const registerForEvent = asyncHandler(async (req, res) => {
@@ -340,8 +347,10 @@ export const registerForEvent = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }
 
-  const eventRoles = event.eventRoles || [];
-  const usesEventRoles = eventRoles.length > 0;
+  const rawEventRoles = event.eventRoles || [];
+  const eventRoles = rawEventRoles.filter((r) => r && (r.title ?? '').trim());
+  const hasRolesWithSlots = eventRoles.some((r) => (r.slots ?? 0) > 0);
+  const usesEventRoles = eventRoles.length > 0 && hasRolesWithSlots;
 
   if (usesEventRoles) {
     if (!appliedRole) {
@@ -350,11 +359,12 @@ export const registerForEvent = asyncHandler(async (req, res) => {
         message: 'appliedRole is required when event has role-based slots',
       });
     }
-    const roleDef = eventRoles.find((r) => r.title && r.title.trim().toLowerCase() === appliedRole.toLowerCase());
+    const roleDef = eventRoles.find((r) => r.title.trim().toLowerCase() === appliedRole.toLowerCase());
     if (!roleDef) {
+      const validRoleNames = eventRoles.map((r) => r.title).filter(Boolean).join(', ') || 'Volunteer';
       return res.status(400).json({
         success: false,
-        message: `Invalid role. Must be one of: ${eventRoles.map((r) => r.title).join(', ')}`,
+        message: `Invalid role. Must be one of: ${validRoleNames}`,
       });
     }
     const filled = roleDef.filledSlots ?? 0;
@@ -453,12 +463,102 @@ export const markAttendance = asyncHandler(async (req, res) => {
   });
 });
 
-function formatEvent(event) {
+export const markSelfAttendance = asyncHandler(async (req, res) => {
+  if (req.user.role !== 'volunteer') {
+    return res.status(403).json({
+      success: false,
+      message: 'Only volunteers can self-mark attendance',
+    });
+  }
+
+  const id = req.params.id;
+  if (!isValidObjectId(id)) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+
+  const event = await Event.findById(id);
+  if (!event) {
+    return res.status(404).json({ success: false, message: 'Event not found' });
+  }
+
+  const { code, method = 'code', latitude, longitude } = req.body;
+  const codeStr = typeof code === 'string' ? code.trim().toUpperCase() : '';
+  if (!codeStr) {
+    return res.status(400).json({
+      success: false,
+      message: 'Attendance code is required',
+    });
+  }
+
+  if (event.attendanceCode !== codeStr) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid attendance code',
+    });
+  }
+
+  const registration = await Registration.findOne({
+    eventId: event._id,
+    volunteerId: req.user._id,
+  });
+
+  if (!registration) {
+    return res.status(400).json({
+      success: false,
+      message: 'You are not registered for this event',
+    });
+  }
+
+  if (!['approved', 'confirmed'].includes(registration.status)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Your registration must be approved before marking attendance',
+    });
+  }
+
+  if (registration.status === 'attended') {
+    return res.status(400).json({
+      success: false,
+      message: 'Attendance already marked',
+    });
+  }
+
+  const markedMethod = ['qr', 'code'].includes(method) ? method : 'code';
+  let markedLocation = null;
+  if (latitude != null && longitude != null && !isNaN(latitude) && !isNaN(longitude)) {
+    markedLocation = `${latitude},${longitude}`;
+  }
+
+  const now = new Date();
+  await Registration.findByIdAndUpdate(registration._id, {
+    status: 'attended',
+    attendedAt: now,
+    markedAt: now,
+    markedLocation,
+    markedMethod,
+  });
+
+  res.json({
+    success: true,
+    message: 'Attendance marked successfully',
+  });
+});
+
+function formatEvent(event, registrationsCount = null) {
   const ngoName =
     event.ngoId?.name || (event.ngoId && typeof event.ngoId === 'object' ? event.ngoId.name : null);
+  const volunteersRegistered = registrationsCount ?? event.volunteersRegistered ?? 0;
+  const eventRoles = event.eventRoles || [];
+  const hasRolesWithSlots = eventRoles.some((r) => (r.slots ?? 0) > 0);
+  let eventRolesFormatted = eventRoles;
+  if (eventRoles.length === 0 || !hasRolesWithSlots) {
+    const defaultSlots = Math.max(event.volunteersRequired || 1, 1);
+    eventRolesFormatted = [{ title: 'Volunteer', slots: defaultSlots, filledSlots: volunteersRegistered }];
+  }
   return {
     ...event,
     id: event._id,
     ngoName: ngoName || 'NGO',
+    eventRoles: eventRolesFormatted,
   };
 }

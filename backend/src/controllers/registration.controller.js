@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Event } from '../models/Event.model.js';
 import { Registration } from '../models/Registration.model.js';
+import { createNotification } from '../modules/notifications/notification.service.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 function isValidObjectId(id) {
@@ -83,6 +84,17 @@ export const approveRegistration = asyncHandler(async (req, res) => {
     await Registration.findByIdAndUpdate(id, { status: 'approved' });
   }
 
+  const coordinatorName = req.user?.name || 'Coordinator';
+  const eventTitle = event.title || 'Event';
+  await createNotification({
+    recipient: reg.volunteerId,
+    sender: req.user._id,
+    eventId: event._id,
+    type: 'DIRECT_MESSAGE',
+    title: 'Application Approved',
+    message: `Your application for "${eventTitle}" has been approved by ${coordinatorName}.`,
+  });
+
   const updated = await Registration.findById(id).populate('volunteerId', 'name email').lean();
   res.json({ success: true, data: { ...updated, id: updated._id } });
 });
@@ -116,6 +128,18 @@ export const rejectRegistration = asyncHandler(async (req, res) => {
   }
 
   await Registration.findByIdAndUpdate(id, { status: 'rejected' });
+
+  const coordinatorName = req.user?.name || 'Coordinator';
+  const eventTitle = event.title || 'Event';
+  await createNotification({
+    recipient: reg.volunteerId,
+    sender: req.user._id,
+    eventId: event._id,
+    type: 'DIRECT_MESSAGE',
+    title: 'Application Not Approved',
+    message: `Your application for "${eventTitle}" was not approved. Contact ${coordinatorName} for more information.`,
+  });
+
   const updated = await Registration.findById(id).populate('volunteerId', 'name email').lean();
   res.json({ success: true, data: { ...updated, id: updated._id } });
 });
@@ -164,6 +188,18 @@ export const offerRole = asyncHandler(async (req, res) => {
   }
 
   await Registration.findByIdAndUpdate(id, { status: 'role_offered', offeredRole });
+
+  const coordinatorName = req.user?.name || 'Coordinator';
+  const eventTitle = event.title || 'Event';
+  await createNotification({
+    recipient: reg.volunteerId,
+    sender: req.user._id,
+    eventId: event._id,
+    type: 'DIRECT_MESSAGE',
+    title: 'Role Offer',
+    message: `${coordinatorName} has offered you the role of "${offeredRole}" for "${eventTitle}". Please accept or decline in your dashboard.`,
+  });
+
   const updated = await Registration.findById(id).populate('volunteerId', 'name email').lean();
   res.json({ success: true, data: { ...updated, id: updated._id } });
 });

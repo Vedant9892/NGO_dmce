@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users,
@@ -9,9 +9,15 @@ import {
   ChevronDown,
   ChevronUp,
   UserX,
+  QrCode,
+  Copy,
+  MapPin,
+  Clock,
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import {
   getCoordinatorEventVolunteers,
+  getAttendanceCode,
   markAttendance,
   approveRegistration,
   rejectRegistration,
@@ -27,11 +33,14 @@ function formatEventNameForFile(name) {
 }
 
 function exportAttendanceCSV(volunteers, eventTitle) {
-  const headers = ['Name', 'Email', 'Status'];
+  const headers = ['Name', 'Email', 'Status', 'Marked At', 'Location', 'Method'];
   const rows = volunteers.map((v) => [
     v.name || 'N/A',
     v.email || 'N/A',
     v.status || 'pending',
+    v.markedAt ? new Date(v.markedAt).toLocaleString() : '—',
+    v.markedLocation || '—',
+    v.markedMethod || '—',
   ]);
   const csv = [headers.join(','), ...rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -133,6 +142,72 @@ function OfferRoleModal({ event, registrationId, volunteerName, availableRoles, 
           >
             {loading ? 'Offering...' : 'Offer Role'}
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AttendanceCodeCard({ event, onCodeLoaded }) {
+  const [code, setCode] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!event?.id) return;
+    setLoading(true);
+    setError(null);
+    getAttendanceCode(event.id)
+      .then((data) => {
+        setCode(data?.code || null);
+        onCodeLoaded?.(data?.code);
+      })
+      .catch((err) => setError(err.response?.data?.message || 'Failed to load code'))
+      .finally(() => setLoading(false));
+  }, [event?.id]);
+
+  const handleCopy = () => {
+    if (!code) return;
+    navigator.clipboard?.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  if (loading) return <div className="p-4 bg-white rounded-lg"><Loader size="sm" /></div>;
+  if (error) return <div className="p-4 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>;
+  if (!code) return null;
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+        <QrCode className="h-5 w-5 mr-2 text-emerald-700" />
+        Attendance Code & QR
+      </h3>
+      <p className="text-sm text-gray-600 mb-4">
+        Volunteers can scan this QR or enter the code to mark their attendance.
+      </p>
+      <div className="flex flex-col sm:flex-row items-center gap-6">
+        <div className="flex-shrink-0 p-4 bg-white border border-gray-200 rounded-lg">
+          <QRCodeSVG value={code} size={160} level="M" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-600 mb-1">Code for manual entry</p>
+          <div className="flex items-center gap-2">
+            <code className="px-4 py-2 bg-gray-100 rounded-lg font-mono text-xl font-bold text-gray-900 tracking-wider">
+              {code}
+            </code>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              title="Copy code"
+            >
+              <Copy className="h-5 w-5 text-gray-600" />
+            </button>
+            {copied && <span className="text-sm text-emerald-600">Copied!</span>}
+          </div>
         </div>
       </div>
     </div>
@@ -288,40 +363,48 @@ export default function EventAttendancePanel({ event }) {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={handleMarkSelected}
-            disabled={selectedIds.length === 0 || attendanceLoading}
-            className="px-4 py-2 bg-emerald-700 text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-          >
-            <CheckSquare className="h-4 w-4 mr-2" />
-            Mark Selected ({selectedIds.length})
-          </button>
-          <button
-            type="button"
-            onClick={handleMarkAllPresent}
+        <AttendanceCodeCard event={event} />
+
+        <div className="space-y-3">
+          <h3 className="font-semibold text-gray-900 flex items-center">
+            <UserCheck className="h-5 w-5 mr-2 text-emerald-700" />
+            Mark Attendance
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={handleMarkSelected}
+              disabled={selectedIds.length === 0 || attendanceLoading}
+              className="px-4 py-2 bg-emerald-700 text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              <CheckSquare className="h-4 w-4 mr-2" />
+              Mark Selected ({selectedIds.length})
+            </button>
+            <button
+              type="button"
+              onClick={handleMarkAllPresent}
             disabled={!canMarkAll || attendanceLoading}
             className="px-4 py-2 bg-emerald-700 text-white text-sm font-semibold rounded-lg hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             <UserCheck className="h-4 w-4 mr-2" />
             Mark All Present
-          </button>
-          <button
-            type="button"
-            onClick={() => exportAttendanceCSV(volunteers, event?.title)}
+            </button>
+            <button
+              type="button"
+              onClick={() => exportAttendanceCSV(volunteers, event?.title)}
             disabled={volunteers.length === 0}
             className="px-4 py-2 bg-gray-600 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             <Download className="h-4 w-4 mr-2" />
             Export Attendance CSV
-          </button>
-          <Link
-            to={`/events/${event?.id ?? event?._id}?markAttendance=true`}
+            </button>
+            <Link
+              to={`/events/${event?.id ?? event?._id}?markAttendance=true`}
             className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 flex items-center"
           >
             Full Attendance View
-          </Link>
+            </Link>
+          </div>
         </div>
 
         {volunteers.length > 0 ? (
@@ -345,6 +428,9 @@ export default function EventAttendancePanel({ event }) {
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                       Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                      Marked Info
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                       Actions
@@ -383,6 +469,31 @@ export default function EventAttendancePanel({ event }) {
                         </td>
                         <td className="px-4 py-3">
                           <StatusBadge status={v.status} />
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {isAttended && (v.markedAt || v.markedLocation || v.markedMethod) ? (
+                            <div className="space-y-1">
+                              {v.markedAt && (
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  {new Date(v.markedAt).toLocaleString()}
+                                </div>
+                              )}
+                              {v.markedLocation && (
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-3.5 w-3.5" />
+                                  {v.markedLocation}
+                                </div>
+                              )}
+                              {v.markedMethod && (
+                                <span className="text-xs text-gray-500">via {v.markedMethod === 'qr' ? 'QR scan' : 'code'}</span>
+                              )}
+                            </div>
+                          ) : isAttended ? (
+                            <span className="text-gray-400">—</span>
+                          ) : (
+                            '—'
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           {isPending && (

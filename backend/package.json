@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed": "node src/seed.js"
+    "seed": "node src/seed.js",
+    "fix-event-roles": "node src/scripts/fix-event-roles.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
