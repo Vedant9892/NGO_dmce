@@ -203,21 +203,11 @@ export default function EventDetailsPage() {
     );
   }
 
-  //const eventRoles = event.eventRoles ?? [];
-  //const hasEventRoles = eventRoles?.length > 0;
-
-const volunteersRequired = event?.volunteersRequired ?? 0;
-const volunteersRegistered = event?.volunteersRegistered ?? 0;
-
-const totalRoleSlots = eventRoles?.reduce(
-  (sum, r) => sum + (r?.slots ?? 0),
-  0
-) ?? 0;
-
-const filledRoleSlots = eventRoles?.reduce(
-  (sum, r) => sum + (r?.filledSlots ?? 0),
-  0
-) ?? 0;const spotsLeft = hasEventRoles
+  const volunteersRequired = event.volunteersRequired ?? 0;
+  const volunteersRegistered = event.volunteersRegistered ?? 0;
+  const totalRoleSlots = eventRoles.reduce((sum, r) => sum + (r.slots ?? 0), 0);
+  const filledRoleSlots = eventRoles.reduce((sum, r) => sum + (r.filledSlots ?? 0), 0);
+  const spotsLeft = hasEventRoles
     ? Math.max(0, totalRoleSlots - filledRoleSlots)
     : Math.max(0, volunteersRequired - volunteersRegistered);
   const roles = event.roles ?? [];

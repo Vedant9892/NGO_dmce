@@ -1,15 +1,9 @@
-﻿import { Link, useLocation } from "react-router-dom";
-import {
-  Menu,
-  X,
-  Heart,
-  Bell,
-  ChevronDown,
-  LogOut
-} from "lucide-react";
-import { useState, useEffect } from "react";
-import { useAuth } from "../../hooks/useAuth";
-import { getDashboardPath } from "../../utils/constants";
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, Heart } from 'lucide-react';
+import NotificationDropdown from './NotificationDropdown';
+import { useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import { getDashboardPath } from '../../utils/constants';
 
 export default function Navbar() {
   const location = useLocation();
@@ -157,8 +151,54 @@ export default function Navbar() {
               >
                 Get Started
               </Link>
-            </>
-          )}
+            )}
+          </div>
+
+          <div className="hidden md:flex items-center space-x-4">
+            {token ? (
+              <>
+                <NotificationDropdown />
+                {roleLabel && (
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${roleBadgeClass}`}>
+                    {roleLabel}
+                  </span>
+                )}
+                {user?.name && (
+                  <span className="text-gray-600 text-sm truncate max-w-[120px]" title={user.name}>
+                    {user.name}
+                  </span>
+                )}
+                <button
+                  onClick={logout}
+                  className="px-4 py-2 text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-medium rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+
+          <button
+            className="md:hidden text-gray-700"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
 
         {/* MOBILE BUTTON */}

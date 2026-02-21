@@ -3,6 +3,7 @@ import { AuthProvider } from '../context/AuthContext';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import AppRoutes from './routes';
+import ChatbotWidget from '../components/ui/ChatbotWidget';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <AppRoutes />
           </main>
           <Footer />
+          <ChatbotWidget />
         </div>
       </Router>
     </AuthProvider>

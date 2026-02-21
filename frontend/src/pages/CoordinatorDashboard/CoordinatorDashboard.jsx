@@ -4,6 +4,7 @@ import { Calendar, MapPin, Users, Eye, ChevronDown, ChevronUp } from 'lucide-rea
 import { getCoordinatorEvents } from '../../services/eventService';
 import Loader from '../../components/ui/Loader';
 import EventAttendancePanel from './EventAttendancePanel';
+import SendNotificationPanel from './SendNotificationPanel';
 
 export default function CoordinatorDashboard() {
   const [events, setEvents] = useState([]);
@@ -71,6 +72,11 @@ export default function CoordinatorDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {events.length > 0 && (
+          <div className="mb-8">
+            <SendNotificationPanel events={events} />
+          </div>
+        )}
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Assigned Events</h2>
         {events.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">
