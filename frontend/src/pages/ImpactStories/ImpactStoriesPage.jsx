@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Heart, Users, Calendar, ArrowRight } from "lucide-react";
 
 export default function ImpactStoriesPage() {
@@ -59,7 +59,7 @@ export default function ImpactStoriesPage() {
               1000+ Volunteer Hours Logged in a Month
             </h2>
             <p className="text-gray-600 mb-6">
-              Through ServeSyncâ€™s coordinated event system and attendance tracking,
+              Through SevaSetuâ€™s coordinated event system and attendance tracking,
               NGOs were able to streamline volunteer efforts and collectively
               contribute over 1000 verified hours of community service in just one month.
             </p>

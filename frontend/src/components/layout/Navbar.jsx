@@ -48,7 +48,7 @@ export default function Navbar() {
             <Heart className="h-5 w-5 text-white" fill="white" />
           </div>
           <span className="text-xl font-bold text-gray-800 group-hover:text-emerald-700 transition">
-            ServeSync
+            SevaSetu
           </span>
         </Link>
 

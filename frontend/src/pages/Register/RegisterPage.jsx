@@ -55,7 +55,7 @@ export default function RegisterPage() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Sign Up</h1>
-          <p className="mt-2 text-gray-600">Create your ServeSync account</p>
+          <p className="mt-2 text-gray-600">Create your SevaSetu account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-8">
@@ -99,7 +99,6 @@ export default function RegisterPage() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="John Doe"
             className="mb-4"
           />
           <Input
@@ -108,7 +107,6 @@ export default function RegisterPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
             className="mb-4"
           />
           <Input
@@ -117,7 +115,6 @@ export default function RegisterPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
             className="mb-4"
           />
           {needsOrganization && (

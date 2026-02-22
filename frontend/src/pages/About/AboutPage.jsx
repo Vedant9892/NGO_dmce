@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Target, Lightbulb, Users, Globe, ArrowRight } from "lucide-react";
 
 export default function AboutPage() {
@@ -9,7 +9,7 @@ export default function AboutPage() {
       <section className="bg-gradient-to-r from-emerald-700 to-teal-600 text-white py-24 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-5xl font-bold mb-6">
-            About ServeSync
+            About SevaSetu
           </h1>
           <p className="text-xl text-white/90 max-w-3xl mx-auto">
             Empowering NGOs and volunteers through technology to create
@@ -60,7 +60,7 @@ export default function AboutPage() {
           </h2>
 
           <p className="text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            ServeSync is a centralized Volunteer Management and Event
+            SevaSetu is a centralized Volunteer Management and Event
             Coordination Platform designed to bridge the gap between NGOs and
             volunteers. Our platform enables NGOs to create and manage events,
             define volunteer roles, track registrations, and monitor attendance
@@ -114,7 +114,7 @@ export default function AboutPage() {
 
           <p className="text-gray-600 leading-relaxed">
             We envision a future where every volunteer contribution is digitally
-            recorded, recognized, and valued. ServeSync aims to become a
+            recorded, recognized, and valued. SevaSetu aims to become a
             scalable solution that NGOs across cities and countries can adopt
             to create structured volunteer ecosystems that drive measurable
             social change.

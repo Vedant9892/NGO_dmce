@@ -1,4 +1,4 @@
-﻿import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getDashboardPath } from '../../utils/constants';
@@ -15,7 +15,7 @@ export default function Footer() {
               <div className="bg-gradient-to-r from-emerald-700 to-emerald-500 p-2 rounded-lg">
                 <Heart className="h-5 w-5 text-white" fill="white" />
               </div>
-              <span className="text-xl font-bold text-white">ServeSync</span>
+              <span className="text-xl font-bold text-white">SevaSetu</span>
             </div>
             <p className="text-sm text-emerald-100/80">
               Connecting volunteers with meaningful opportunities to create lasting impact in communities.
@@ -109,7 +109,7 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-emerald-400" />
-                <span>contact@servesync.org</span>
+                <span>contact@sevasetu.org</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 text-emerald-400" />
@@ -124,7 +124,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-emerald-900/70 mt-8 pt-8 text-sm text-center text-emerald-100/75">
-          <p>&copy; 2024 ServeSync. All rights reserved.</p>
+          <p>&copy; 2024 SevaSetu. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -26,9 +26,9 @@ export default function LandingPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const heroImages = [
-    "https://images.unsplash.com/photo-1559027615-cd4628902d4a",
-    "https://images.unsplash.com/photo-1529156069898-49953e39b3ac",
-    "https://images.unsplash.com/photo-1509099836639-18ba1795216d",
+    "https://cdcxnfudyyguesylonrt.supabase.co/storage/v1/object/public/slider/ngoslider1.webp",
+    "https://cdcxnfudyyguesylonrt.supabase.co/storage/v1/object/public/slider/ngoslider2.webp",
+    "https://cdcxnfudyyguesylonrt.supabase.co/storage/v1/object/public/slider/slider3.webp",
   ];
 
   // Slider
@@ -104,7 +104,7 @@ export default function LandingPage() {
 
           <p className="text-lg md:text-xl text-gray-200 mb-10">
             Join NGOs, participate in meaningful events, track your impact,
-            and build your social contribution portfolio with ServeSync.
+            and build your social contribution portfolio with SevaSetu.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
