@@ -1,6 +1,6 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Users, Building2, Heart } from 'lucide-react';
+import { Users, Heart } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { getDashboardPath } from '../../utils/constants';
 import { ROLES } from '../../utils/constants';
@@ -9,7 +9,6 @@ import Button from '../../components/ui/Button';
 
 const ROLE_OPTIONS = [
   { value: ROLES.VOLUNTEER, label: 'Volunteer', desc: 'Find and join events', icon: Users },
-  { value: ROLES.COORDINATOR, label: 'Coordinator', desc: 'Manage event attendance', icon: Building2 },
   { value: ROLES.NGO, label: 'NGO', desc: 'Post events and manage volunteers', icon: Heart },
 ];
 
@@ -24,7 +23,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const needsOrganization = role === ROLES.NGO || role === ROLES.COORDINATOR;
+  const needsOrganization = role === ROLES.NGO;
 
   useEffect(() => {
     if (token && user) {
@@ -36,7 +35,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
     if (needsOrganization && !organization.trim()) {
-      setError('Organization is required for NGO and Coordinator accounts');
+      setError('Organization is required for NGO accounts');
       return;
     }
     setLoading(true);
@@ -128,7 +127,7 @@ export default function RegisterPage() {
               required={needsOrganization}
               value={organization}
               onChange={(e) => setOrganization(e.target.value)}
-              placeholder={role === ROLES.NGO ? 'e.g., Green Earth NGO' : 'e.g., City Volunteer Hub'}
+              placeholder="e.g., Green Earth NGO"
               className="mb-6"
             />
           )}
